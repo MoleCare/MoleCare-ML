@@ -32,5 +32,6 @@ py -3 -m venv .venv
 
 
 # How to run flask
+>source ./venv/bin/activate  # sh, bash, or zsh
 >python3 -m flask run
 
