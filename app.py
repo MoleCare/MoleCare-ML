@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, url_for, jsonify,Response, jsonify
+import base64
+from io import BytesIO
+from keras.applications import inception_v3
+from keras.preprocessing import image
 import json
-import tensorflow as tf
 import numpy as np
 import re
 import os
@@ -8,6 +11,7 @@ import argparse
 import sys
 from datetime import datetime
 
+import tensorflow as tf
 from grpc.beta import implementations
 from tensorflow_serving.apis import predict_pb2
 from tensorflow_serving.apis import prediction_service_pb2
@@ -20,6 +24,39 @@ app = Flask(__name__)
 
 if __name__ == '__main__':
     app.run(host=HOST, port=PORT_NUMBER)
+
+# Uncomment this line if you are making a Cross domain request
+# CORS(app)
+
+# Testing URL
+@app.route('/hello/', methods=['GET', 'POST'])
+def hello_world():
+    return 'Hello, World!'
+
+
+@app.route('/imageclassifier/predict/', methods=['POST'])
+def image_classifier():
+    # Decoding and pre-processing base64 image
+    img = image.img_to_array(image.load_img(BytesIO(base64.b64decode(request.form['b64'])),
+                                            target_size=(224, 224))) / 255.
+
+    # this line is added because of a bug in tf_serving(1.10.0-dev)
+    img = img.astype('float16')
+
+    # Creating payload for TensorFlow serving request
+    payload = {
+        "instances": [{'input_image': img.tolist()}]
+    }
+
+    # Making POST request
+    r = requests.post('http://localhost:9000/v1/models/ImageClassifier:predict', json=payload)
+
+    # Decoding results from TensorFlow Serving server
+    pred = json.loads(r.content.decode('utf-8'))
+
+    # Returning JSON response to the frontend
+    return jsonify(inception_v3.decode_predictions(np.array(pred['predictions']))[0])
+
 
 
 class mainSessRunning():
