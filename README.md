@@ -26,6 +26,11 @@ py -3 -m venv .venv
 >source .venv/bin/activate
 
 >pip3 install matplotlib
+>pip3 install imageai
+>pip3 install tensorflow
+>pip3 install pillow
+>pip3 install numpy
+>pip3 install opencv-python
 
 >/Applications/Xcode.app/Contents/Developer/usr/bin/python3 -m pip install --upgrade pip
 >pip3 install flask
