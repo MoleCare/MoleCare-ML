@@ -38,6 +38,10 @@ except:
 Install TFX
 >pip install -U tfx
 
+# Serving is how you apply machine learning model after you’ve trained it
+TensorFlow Serving makes the process of taking a model into production easier and faster. It allows you to safely deploy new models and run experiments while keeping the same server architecture and APIs. Out of the box, it provides integration with TensorFlow, but it can be extended to serve other types of models.
+
+
 
 
 
