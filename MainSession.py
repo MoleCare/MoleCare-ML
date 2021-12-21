@@ -18,3 +18,10 @@ class mainSessRunning():
 
         result = self.stub.Predict(self.request, 5.0)
         return result, label
+
+run = mainSessRunning()
+
+print("Initialization done. ")
+
+
+

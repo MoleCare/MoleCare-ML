@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, url_for, jsonify,Response, jsonify
 import base64
 from io import BytesIO
+import tensorflow as tf
 from keras.applications import inception_v3
 from keras.preprocessing import image
 import json
@@ -11,28 +12,10 @@ import argparse
 import sys
 from datetime import datetime
 
-import tensorflow as tf
-from grpc.beta import implementations
-from tensorflow_serving.apis import predict_pb2
-from tensorflow_serving.apis import prediction_service_pb2
-
-
-tf.app.flags.DEFINE_string('server', 'localhost:9000', 'PredictionService host:port')
-FLAGS = tf.app.flags.FLAGS
-
 app = Flask(__name__)
-
-if __name__ == '__main__':
-    app.run(host=HOST, port=PORT_NUMBER)
 
 # Uncomment this line if you are making a Cross domain request
 # CORS(app)
-
-# Testing URL
-@app.route('/hello/', methods=['GET', 'POST'])
-def hello_world():
-    return 'Hello, World!'
-
 
 @app.route('/imageclassifier/predict/', methods=['POST'])
 def image_classifier():
@@ -58,36 +41,9 @@ def image_classifier():
     return jsonify(inception_v3.decode_predictions(np.array(pred['predictions']))[0])
 
 
-
-class mainSessRunning():
-    def __init__(self):
-        host, port = FLAGS.server.split(':')
-        channel = implementations.insecure_channel(host, int(port))
-        self.stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
-
-        self.request = predict_pb2.PredictRequest()
-        self.request.model_spec.name = 'example_model'
-        self.request.model_spec.signature_name = 'prediction'
-
-    def inference(self, val_x):
-        # temp_data = numpy.random.randn(100, 3).astype(numpy.float32)
-        temp_data = val_x.astype(np.float32).reshape(-1, 3)
-        print("temp_data is:", temp_data)
-        data, label = temp_data, np.sum(temp_data * np.array([1, 2, 3]).astype(np.float32), 1)
-        self.request.inputs['input'].CopyFrom(
-            tf.contrib.util.make_tensor_proto(data, shape=data.shape))
-
-        result = self.stub.Predict(self.request, 5.0)
-        return result, label
-
-
-run = mainSessRunning()
-
-print("Initialization done. ")
-
-@app.route("/")
+@app.route('/hello/', methods=['GET', 'POST'])
 def home():
-    return "Hello, Flask!"
+    return "Hello"
 
 #@app.route(APP_ROOT, methods=["POST"])
 #def infer():
