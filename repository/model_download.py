@@ -14,7 +14,7 @@ buckets = storage_client.list_buckets()
 for bucket in buckets:
     print(bucket.name)
 
-bucket=storage_client.get_bucket(bucket_name)
+bucket = storage_client.get_bucket(bucket_name)
 
 blobs = bucket.list_blobs()
 blob_model = Null 
