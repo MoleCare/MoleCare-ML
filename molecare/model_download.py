@@ -2,7 +2,7 @@ import logging
 import os
 from google.cloud import storage
 from pyasn1.type.univ import Null
-
+from .preprocess import Preprocessing
 
 file_name = 'model_molecare_v1.h5'
 bucket_name = 'twoay-ltd-molecare.appspot.com' #/ML-Melanoma/model_molecare_v1.h5
@@ -34,4 +34,6 @@ if blob_model != Null :
     blob = bucket.blob(blob_model.name)
     blob.download_to_filename(destination_uri)
 
-
+proprocessing = Preprocessing()
+proprocessing.loadModel()
+proprocessing.loadTestImage()

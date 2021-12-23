@@ -8,7 +8,7 @@ import pathlib
 
 class Preprocessing :
   staticVar = 'hi' #class variable shared by all instances
-  
+
   def __init__(self):
     self.imgHeight = 224 #instance variable unique to each instance
     self.imgWidth = 224
@@ -24,6 +24,9 @@ class Preprocessing :
   def loadModel(self) :
     # Recreate the exact same model, including its weights and the optimizer
     self.mlModel = tf.keras.models.load_model('./../ml-model/model_molecare_v1.h5')
+
+  def getModel(self) :
+    return self.mlModel
 
   def printModel(self) :
     if self.mlModel != None :
