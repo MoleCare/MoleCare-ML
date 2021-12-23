@@ -1,33 +1,21 @@
 import tensorflow as tf
 from tensorflow import keras
 from keras.models import load_model
-
-#model = tf.saved_model.load('./tf_model')
-#model = load_model('./tf_model')
-
-# Recreate the exact same model, including its weights and the optimizer
-new_model = tf.keras.models.load_model('my_model.h5')
-# Show the model architecture
-new_model.summary()
-
-print(new_model)
-
-
-model = tf.saved_model.load('./tf_model')
-
-
-
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
+
+loaded_model = tf.keras.models.load_model('./ml-model/model_molecare_v1.h5')
+# Show the model architecture
+loaded_model.summary()
+print(loaded_model)
+
+model = tf.saved_model.load('./tf_model')
 
 num_classes = 2 # Melanoma, NotMelanoma
 p_same = 'same'
 a_leaky_relu = tf.nn.leaky_relu
 k_size = 3
-
-from tensorflow import keras
-from tensorflow.keras import layers
 
 image_channels = 3 #RGB
 # no changes, but to be sure that all images have the same size
