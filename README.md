@@ -8,19 +8,9 @@
 >alias pip=pip3
 
 
-1. Create environment
-# Linux
-sudo apt-get install python3-venv    # If needed
+# Create environment macOS
 python3 -m venv .venv
 source .venv/bin/activate
-
-# macOS
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Windows
-py -3 -m venv .venv
-.venv\scripts\activate
 
 >python3 -m venv .venv
 >source .venv/bin/activate
@@ -39,4 +29,49 @@ py -3 -m venv .venv
 # How to run flask
 >source ./venv/bin/activate  # sh, bash, or zsh
 >python3 -m flask run
+>python -m flask run
+
+# Install tensor flow serving
+https://www.tensorflow.org/tfx/serving/docker
+
+>docker pull tensorflow/serving
+>tensorflow_model_server --port=8500 --rest_api_port=8501 \
+--model_name=${MODEL_NAME} --model_base_path=${MODEL_BASE_PATH}/${MODEL_NAME}  ex: tensorflow_model_server --port=8500 --rest_api_port=8501 \
+--model_name=${MODEL_NAME} --model_base_path=/models/model
+
+tensorflow_model_server --model_base_path=/home/ubuntu/Desktop/Medium/keras-and-tensorflow-serving/my_image_classifier --rest_api_port=9000 --model_name=ImageClassifier
+
+--rest_api_port: Tensorflow Serving will start a gRPC ModelServer on port 8500 and the REST API will be available on port 9000.
+--model_name: This will be the name of your Serving server using which you will send a POST request. You can type any name you want here.
+
+
+The script basically mimics request from the frontend:
+
+We take an input image, encode it to base64 format and send it to our Flask server using POST request.
+Flask server decodes this base64 image and pre-processes it for our TensorFlow Serving server.
+Flask server then makes a POST request to our TensorFlow serving server and decodes the response.
+The decoded response is formatted and sent back to the frontend.
+
+# CORS
+https://flask-cors.readthedocs.io/en/latest/index.html
+>pip install -U flask-cors
+> 
+
+# Package manager
+> pip install -e .
+> setup.py # contains dependencies, which are installed by cmd `pip install -e .`
+> pip list # observe that the project is now installed with pip list
+> 
+
+
+#
+- install is Python 3, Pip (Python Package Index), and Flask
+- 
+
+
+# Django vs Flask
+https://auth0.com/blog/developing-restful-apis-with-python-and-flask/
+
+
+
 
