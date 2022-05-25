@@ -88,7 +88,8 @@ https://auth0.com/blog/developing-restful-apis-with-python-and-flask/
 >coverage report
 >coverage html
 
-
+# Github
+>git push molecare main (molecare is origin repo, and main is master branch)
 
 
 
