@@ -22,7 +22,7 @@ Django==3.2.13
 fields==5.0.0
 filelock==3.7.0
 Flask==2.1.2
--e git+https://github.com/EugeneBichel/MoleCare-ML.git@a117f5211f10a243459e420f6021a9e5e5128a1a#egg=flaskr
+-e git+https://github.com/EugeneBichel/MoleCare-ML.git@d65cb772e7441860e563961c564d3679197c3dd4#egg=flaskr
 flatbuffers==1.12
 fonttools==4.33.3
 future==0.18.2
@@ -92,6 +92,7 @@ tensorboard-plugin-wit==1.8.1
 tensorflow==2.9.0
 tensorflow-estimator==2.9.0
 tensorflow-io-gcs-filesystem==0.26.0
+tensorflow-serving-api==2.8.0
 termcolor==1.1.0
 tldextract==3.3.0
 tomli==2.0.1
