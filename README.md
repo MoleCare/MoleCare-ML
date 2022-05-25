@@ -76,6 +76,21 @@ Pipenv is a dependency manager that isolates projects on private environments, a
 >python3 -m pip install pipenv
 >pipenv install requests
 
+Install from Pipfile, if there is one:
+>pipenv install
+
+Or, add a package to your new project:
+>pipenv install <package>
+
+>pipenv update
+>pipenv update --outdated
+
+### using lock
+>pipenv lock
+>pipenv lock --keep-outdated
+
+
+
 ## migrate from requirements.txt to pipenv
 >pipenv install -r requirements.txt
 

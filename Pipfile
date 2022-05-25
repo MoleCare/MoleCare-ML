@@ -27,7 +27,6 @@ dependency-injector = "==4.39.1"
 distlib = "==0.3.4"
 fields = "==5.0.0"
 filelock = "==3.7.0"
-flaskr = {editable = true, ref = "adc5f229b519837b99a65d3d0319a4f62dbcf631", git = "https://github.com/EugeneBichel/MoleCare-ML.git"}
 flatbuffers = "==1.12"
 fonttools = "==4.33.3"
 future = "==0.18.2"
