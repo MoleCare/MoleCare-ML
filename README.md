@@ -1,3 +1,7 @@
+>python3 -m venv venv
+>source .venv/bin/activate
+
+
 # MoleCare Melanoma CNN model with Rest API
 
 >python --version
@@ -61,8 +65,14 @@ https://flask-cors.readthedocs.io/en/latest/index.html
 > pip install -e .
 > setup.py # contains dependencies, which are installed by cmd `pip install -e .`
 > pip list # observe that the project is now installed with pip list
-> 
 
+>python3 -m pip install pipenv
+>pipenv install requests
+
+https://packaging.python.org/en/latest/tutorials/packaging-projects/
+# Build
+>python3 -m pip install --upgrade build
+>python3 -m build
 
 #
 - install is Python 3, Pip (Python Package Index), and Flask
@@ -71,6 +81,14 @@ https://flask-cors.readthedocs.io/en/latest/index.html
 
 # Django vs Flask
 https://auth0.com/blog/developing-restful-apis-with-python-and-flask/
+
+# Run tests
+>pytest
+>coverage run -m pytest
+>coverage report
+>coverage html
+
+
 
 
 
