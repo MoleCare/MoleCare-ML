@@ -62,14 +62,22 @@ https://flask-cors.readthedocs.io/en/latest/index.html
 > 
 
 # Package manager
+## pip requirements.txt
+pip supports package management through the requirements.txt file
 > pip install -e .
 > setup.py # contains dependencies, which are installed by cmd `pip install -e .`
 > pip list # observe that the project is now installed with pip list
 
->python3 -m pip install pipenv
->pipenv install requests
 >pip freeze > requirements.txt
 >pip install -r requirements.txt
+
+## pipenv
+Pipenv is a dependency manager that isolates projects on private environments, allowing packages to be installed per project.
+>python3 -m pip install pipenv
+>pipenv install requests
+
+## migrate from requirements.txt to pipenv
+>pipenv install -r requirements.txt
 
 https://packaging.python.org/en/latest/tutorials/packaging-projects/
 # Build
