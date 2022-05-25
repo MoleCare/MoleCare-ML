@@ -94,5 +94,7 @@ https://auth0.com/blog/developing-restful-apis-with-python-and-flask/
 >git push molecare main (molecare is origin repo, and main is master branch)
 
 
-
+export FLASK_APP=molecare-ml.application
+export FLASK_ENV=development
+flask run
 

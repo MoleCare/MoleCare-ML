@@ -17,12 +17,13 @@ cors==1.0.1
 coverage==6.4
 cryptography==37.0.2
 cycler==0.11.0
+dependency-injector==4.39.1
 distlib==0.3.4
 Django==3.2.13
 fields==5.0.0
 filelock==3.7.0
 Flask==2.1.2
--e git+https://github.com/EugeneBichel/MoleCare-ML.git@d65cb772e7441860e563961c564d3679197c3dd4#egg=flaskr
+-e git+https://github.com/EugeneBichel/MoleCare-ML.git@adc5f229b519837b99a65d3d0319a4f62dbcf631#egg=flaskr
 flatbuffers==1.12
 fonttools==4.33.3
 future==0.18.2
