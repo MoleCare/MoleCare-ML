@@ -1,9 +1,9 @@
 import tensorflow as tf
 from tensorflow import keras
 from keras.models import load_model
-from tensorflow.keras import layers
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
+from keras import layers
+from keras.models import Sequential
+from keras.layers import Dense
 
 loaded_model = tf.keras.models.load_model('./ml-model/model_molecare_v1.h5')
 # Show the model architecture

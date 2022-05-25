@@ -1,7 +1,7 @@
 import requests
 from PIL import Image
 import numpy as np
-ENDPOINT_URL = http://0.0.0.0:8080/infer
+ENDPOINT_URL = 'http://0.0.0.0:8080/infer'
 
 def infer():
     image = np.asarray(Image.open('resources/yorkshire_terrier.jpg')).astype(np.float32)

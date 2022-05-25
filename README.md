@@ -68,6 +68,8 @@ https://flask-cors.readthedocs.io/en/latest/index.html
 
 >python3 -m pip install pipenv
 >pipenv install requests
+>pip freeze > requirements.txt
+>pip install -r requirements.txt
 
 https://packaging.python.org/en/latest/tutorials/packaging-projects/
 # Build
