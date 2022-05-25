@@ -112,6 +112,7 @@ https://auth0.com/blog/developing-restful-apis-with-python-and-flask/
 >coverage run -m pytest
 >coverage report
 >coverage html
+>py.test tests.py --cov=molecare-ml
 
 # Github
 >git push molecare main (molecare is origin repo, and main is master branch)
