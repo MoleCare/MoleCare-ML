@@ -16,6 +16,7 @@ import json
 import numpy as np
 import re
 from datetime import datetime
+import traceback
 
 app = Flask(__name__)
 #cross domain requests
@@ -173,31 +174,40 @@ def image_classifier():
 def home():
     return "Hello"
 
-#@app.route(APP_ROOT, methods=["POST"])
-#def infer():
-#    data = request.json
-#    image = data['image']
-#    return u_net.infer(image)
+@app.route(APP_ROOT, methods=["POST"])
+def infer():
+    data = request.json
+    image = data['image']
+    return u_net.infer(image)
 
 
-#@app.before_request
-#def load_user():
-#    if "user_id" in session:
-#        g.user = db.session.get(session["user_id"])
+@app.before_request
+def load_user():
+    if "user_id" in session:
+        g.user = db.session.get(session["user_id"])
 
-#@app.route("/me")
-#def me_api():
-#    user = get_current_user()
-#    return {
-#        "username": user.username,
-#        "theme": user.theme,
-#        "image": url_for("user_image", filename=user.image),
-#    }
+@app.route("/me")
+def me_api():
+    user = get_current_user()
+    return {
+        "username": user.username,
+        "theme": user.theme,
+        "image": url_for("user_image", filename=user.image),
+    }
 
-#@app.route("/users")
-#def users_api():
-#    users = get_all_users()
-#    return jsonify([user.to_json() for user in users])
+@app.route("/users")
+def users_api():
+    user = get_current_user()
+    users = [{
+        "username": user.username,
+        "theme": user.theme,
+        "image": url_for("user_image", filename=user.image),
+    },{
+        "username": user.username,
+        "theme": user.theme,
+        "image": url_for("user_image", filename=user.image),
+    }]
+    return jsonify([user.to_json() for user in users])
 
 # Define a route for the default URL, which loads the form
 @app.route('/inference', methods=['POST'])
@@ -248,42 +258,9 @@ def upload_file():
         f = request.files['the_file']
         f.save('/var/www/uploads/uploaded_file.txt')
 
-
-#Coolie
-#@app.route('/')
-#def index():
-#    username = request.cookies.get('username')
-    # use cookies.get(key) instead of cookies[key] to not get a
-    # KeyError if the cookie is missing.
-#
-# from flask import make_response
-#@app.route('/')
-#def index():
-#    resp = make_response(render_template(...))
-#    resp.set_cookie('username', 'the username')
-#    return resp
-
-
-#from flask import abort, redirect, url_for
-#@app.route('/')
-#def index():
-#    return redirect(url_for('login'))
-#
-#@app.route('/login')
-#def login():
-#    abort(401)
-#    this_is_never_executed()
-
-
-#error handler
-#from flask import render_template
-#@app.errorhandler(404)
-#def page_not_found(error):
-#    return render_template('page_not_found.html'), 404
-#
-#@app.errorhandler(Exception)
-#def handle_exception(e):
-#    return jsonify(stackTrace=traceback.format_exc())
+@app.errorhandler(Exception)
+def handle_exception(e):
+    return jsonify(stackTrace=traceback.format_exc())
 
 
 
