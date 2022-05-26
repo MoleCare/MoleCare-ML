@@ -99,10 +99,6 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 >python3 -m pip install --upgrade build
 >python3 -m build
 
-#
-- install is Python 3, Pip (Python Package Index), and Flask
-- 
-
 
 # Django vs Flask
 https://auth0.com/blog/developing-restful-apis-with-python-and-flask/
@@ -122,3 +118,12 @@ export FLASK_APP=molecare-ml.application
 export FLASK_ENV=development
 flask run
 
+
+
+# Python distribution format is wheel with the .whl extension.
+>python setup.py bdist_wheel
+
+
+# Database
+Initialized the database.
+>flask init-db

@@ -114,6 +114,8 @@ Werkzeug = "==2.1.2"
 pytest-flask = "*"
 pytest-cov = "*"
 flask-cors = "*"
+wheel = "*"
+waitress = "*"
 
 [dev-packages]
 
