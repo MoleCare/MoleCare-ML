@@ -2,7 +2,7 @@ import logging
 import os
 from google.cloud import storage
 from pyasn1.type.univ import Null
-from .preprocess import Preprocessing
+from src.tfserving.preprocess import Preprocessing
 
 file_name = 'model_molecare_v1.h5'
 bucket_name = 'twoay-ltd-molecare.appspot.com' #/ML-Melanoma/model_molecare_v1.h5

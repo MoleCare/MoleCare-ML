@@ -2,6 +2,7 @@ from flask import Flask, render_template, \
     request, url_for, jsonify, \
     Response, jsonify, make_response, \
     abort, redirect, url_for
+from flask_cors import CORS, cross_origin
 from paramiko._winapi import get_current_user
 from werkzeug.utils import secure_filename
 from markupsafe import escape
@@ -14,19 +15,21 @@ from keras.preprocessing import image
 import json
 import numpy as np
 import re
-import os
-import argparse
-import sys
 from datetime import datetime
 
 app = Flask(__name__)
-
-# Uncomment this line if you are making a Cross domain request
-# CORS(app)
+#cross domain requests
+CORS(app)
 
 @app.route('/')
+@cross_origin()
 def index():
     return redirect(url_for('login'))
+
+@app.route('/hello/', methods=['GET', 'POST'])
+@cross_origin()
+def home():
+    return "Hello"
 
 @app.errorhandler(404)
 def not_found(error):
@@ -35,6 +38,7 @@ def not_found(error):
     return resp
 
 @app.route("/me")
+@cross_origin()
 def me_api():
     user = get_current_user()
     return {
@@ -63,6 +67,83 @@ def show_post(post_id):
 def show_subpath(subpath):
     # show the subpath after /path/
     return f'Subpath {escape(subpath)}'
+
+
+# Testing URL
+@app.route('/hello/', methods=['GET', 'POST'])
+def hello_world():
+    return 'Hello, World!'
+
+
+
+@app.route('/getmsg/', methods=['GET'])
+def respond():
+    # Retrieve the name from the url parameter /getmsg/?name=
+    name = request.args.get("name", None)
+
+    # For debugging
+    print(f"Received: {name}")
+
+    response = {}
+
+    # Check if the user sent a name at all
+    if not name:
+        response["ERROR"] = "No name found. Please send a name."
+    # Check if the user entered a number
+    elif str(name).isdigit():
+        response["ERROR"] = "The name can't be numeric. Please send a string."
+    else:
+        response["MESSAGE"] = f"Welcome {name} to our awesome API!"
+
+    # Return the response in json format
+    return jsonify(response)
+
+
+@app.route('/post/', methods=['POST'])
+def post_something():
+    param = request.form.get('name')
+    print(param)
+    # You can add the test cases you made in the previous function, but in our case here you are just testing the POST functionality
+    if param:
+        return jsonify({
+            "Message": f"Welcome {param} to our awesome API!",
+            # Add this option to distinct the POST request
+            "METHOD": "POST"
+        })
+    else:
+        return jsonify({
+            "ERROR": "No name found. Please send a name."
+        })
+
+
+@app.route('/')
+def index():
+    # A welcome message to test our server
+    return "<h1>Welcome to our medium-greeting-api!</h1>"
+
+
+@app.route('/imageclassifier/predict/', methods=['POST'])
+def image_classifier():
+    # Decoding and pre-processing base64 image
+    img = image.img_to_array(image.load_img(BytesIO(base64.b64decode(request.form['b64'])),
+                                            target_size=(224, 224))) / 255.
+
+    # this line is added because of a bug in tf_serving(1.10.0-dev)
+    img = img.astype('float16')
+
+    # Creating payload for TensorFlow serving request
+    payload = {
+        "instances": [{'input_image': img.tolist()}]
+    }
+
+    # Making POST request
+    r = requests.post('http://localhost:9000/v1/models/ImageClassifier:predict', json=payload)
+
+    # Decoding results from TensorFlow Serving server
+    pred = json.loads(r.content.decode('utf-8'))
+
+    # Returning JSON response to the frontend
+    return jsonify(inception_v3.decode_predictions(np.array(pred['predictions']))[0])
 
 @app.route('/imageclassifier/predict/', methods=['POST'])
 def image_classifier():

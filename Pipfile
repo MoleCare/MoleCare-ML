@@ -113,6 +113,7 @@ PySocks = "==1.7.1"
 Werkzeug = "==2.1.2"
 pytest-flask = "*"
 pytest-cov = "*"
+flask-cors = "*"
 
 [dev-packages]
 

@@ -33,7 +33,7 @@ class Preprocessing :
       print(self.mlModel.summary())
 
   def loadTestImage(self) :    
-    pathImg = pathlib.Path("../data/static/test_images/Melanoma/ISIC_0034074.jpg")
+    pathImg = pathlib.Path("../../data/static/test_images/Melanoma/ISIC_0034074.jpg")
     testImage = tf.keras.preprocessing.image.load_img(pathImg, target_size=(self.imgHeight, self.imgWidth))
 
     arrTestImage = tf.keras.preprocessing.image.img_to_array(testImage)
