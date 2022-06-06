@@ -32,8 +32,6 @@ N
 requirements.txt,1/9/19359a61ae2446b51b549167b014da2fcf265768
 <
 Pipfile.lock,e/5/e563262209b7c2e62d1869582c8134583baa2204
-B
-src/application.py,f/2/f2c16367a47dc7a159f6522f5f3595dc8d7323f9
 7
 Pipfile,1/5/15af4b3d30054104e85f65a444b1db188c5deefb
 =
@@ -43,3 +41,43 @@ C
 :
 
 dockerfile,5/5/558c49b604560afd1841f2a7b49e2f60bd1f99b3
+G
+src/service/auto_cmd.py,3/7/372d4f61a295b3119a4892aabd0a97f785ae140c
+R
+"src/tfserving/clientToTFServing.py,2/b/2bdeccc71d4cfce20ee7b805059597a7bc50db78
+W
+'src/tfserving/serving_sample_request.py,6/0/605a67b2fa16ba44e319e4eeef3c02afdd692714
+V
+&src/tfserving/tf-model-load-predict.py,1/b/1b18d0765c3cca6a99622d8cf21a4044df7c89ee
+P
+ src/tfserving/mole-preprocess.py,c/c/cc705a9ca784113a928f6c4d3aa455fa78dc876d
+d
+4src/tfserving/send-image-as-param-to-rest-service.py,9/9/99fb713c46dc1d0d14a30f41a44b1efd6ac4c498
+R
+"src/tfserving/image-to-np-array.py,6/d/6d4a16ebf2d10b03cd18a9acf81c3c2944c2c2f1
+O
+src/tfserving/model_download.py,4/b/4b5b5c7576e0a01fd3dfc48a9c3fa7097c8aa940
+K
+src/tfserving/preprocess.py,3/c/3c49cb684e014fd70ebb967e9a47b9f1e89708ac
+A
+src/containers.py,c/9/c92422da926f14187a30df0d9e9997d45ffac5e2
+I
+src/repository/schema.sql,d/8/d8fd2e46e7968d5953d572cac8621c5d1f417d97
+9
+	config.py,1/a/1a1b9769344cb239f2e540e1e6ee1efa2d3034ea
+D
+src/repository/db.py,7/5/75a7b4811a41988f499cbd1b64e4f0e9a43e7770
+8
+setup.py,8/e/8e2edce0d507e1297474f25c00cae94258db38d8
+A
+bootstrap-prod.sh,4/5/455b43214b225376ee8d3857bc48528589e3f44c
+H
+src/service/mlservice.py,9/8/988ce7b4f2bc96e5cafeeb9934d53f4c0df3d0d1
+B
+src/application.py,f/2/f2c16367a47dc7a159f6522f5f3595dc8d7323f9
+?
+src/__init__.py,b/1/b141e8a708cfc0de96ab25c59ca83087cbddf7fa
+@
+bootstrap-dev.sh,9/5/9505a19a9c53e5baec237eb7b6370366bbead5f0
+G
+src/service/__init__.py,a/d/adb61d720c7aba19520f46b72704788fc014824c

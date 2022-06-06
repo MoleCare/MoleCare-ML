@@ -18,6 +18,8 @@ import re
 from datetime import datetime
 import traceback
 
+from injector import inject
+
 app = Flask(__name__)
 #cross domain requests
 CORS(app)
@@ -174,17 +176,17 @@ def image_classifier():
 def home():
     return "Hello"
 
-@app.route(APP_ROOT, methods=["POST"])
-def infer():
-    data = request.json
-    image = data['image']
-    return u_net.infer(image)
+#@app.route(APP_ROOT, methods=["POST"])
+#def infer():
+    #data = request.json
+    #image = data['image']
+    #return u_net.infer(image)
 
 
-@app.before_request
-def load_user():
-    if "user_id" in session:
-        g.user = db.session.get(session["user_id"])
+#@app.before_request
+#def load_user():
+#    if "user_id" in session:
+#        g.user = db.session.get(session["user_id"])
 
 @app.route("/me")
 def me_api():
@@ -221,13 +223,6 @@ def inference():
 def preprocess(self, image):
     image = tf.image.resize(image, (self.image_size, self.image_size))
     return tf.cast(image, tf.float32) / 255.0
-
-def infer(self, image=None):
-    tensor_image = tf.convert_to_tensor(image, dtype=tf.float32)
-    tensor_image = self.preprocess(tensor_image)
-    shape = tensor_image.shape
-    tensor_image = tf.reshape(tensor_image,[1, shape[0],shape[1], shape[2]])
-    return self.predict(tensor_image)['conv2d_transpose_4']
 
 
 

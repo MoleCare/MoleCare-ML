@@ -127,3 +127,8 @@ flask run
 # Database
 Initialized the database.
 >flask init-db
+
+
+# Google Cloud Storage
+>pipenv install google-cloud-storage
+

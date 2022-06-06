@@ -116,6 +116,8 @@ pytest-cov = "*"
 flask-cors = "*"
 wheel = "*"
 waitress = "*"
+injector = "*"
+google-cloud-storage = "*"
 
 [dev-packages]
 
