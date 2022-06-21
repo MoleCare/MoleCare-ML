@@ -21,4 +21,5 @@ RUN pipenv install
 # Start app
 EXPOSE 5000
 #ENTRYPOINT ["bootstrap-dev.sh"]
-CMD sh bootstrap-dev.sh
+#CMD sh bootstrap-dev.sh
+CMD ["python", "app.py"]
