@@ -1,6 +1,7 @@
 # Run
 >docker image build -t molecare-ml .
 >docker run -p 5000:5000 -d molecare-ml
+>docker-build-run.sh
 
 # Stop
 >docker container stop <container-id>

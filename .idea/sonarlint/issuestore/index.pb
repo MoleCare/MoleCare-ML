@@ -32,8 +32,6 @@ N
 Pipfile.lock,e/5/e563262209b7c2e62d1869582c8134583baa2204
 =
 tests/test.py,2/6/260c16d0c0db389dc861969f8c921f71efc023ae
-C
-docker-build-run.sh,8/8/88ecd6ad5a19a5eda238fea698f4de8d691e1de0
 W
 'src/tfserving/serving_sample_request.py,6/0/605a67b2fa16ba44e319e4eeef3c02afdd692714
 V
@@ -50,8 +48,6 @@ K
 src/tfserving/preprocess.py,3/c/3c49cb684e014fd70ebb967e9a47b9f1e89708ac
 I
 src/repository/schema.sql,d/8/d8fd2e46e7968d5953d572cac8621c5d1f417d97
-9
-	config.py,1/a/1a1b9769344cb239f2e540e1e6ee1efa2d3034ea
 8
 setup.py,8/e/8e2edce0d507e1297474f25c00cae94258db38d8
 ?

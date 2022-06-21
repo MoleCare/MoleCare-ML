@@ -1,6 +1,6 @@
 #!/bin/sh
 # build the image
-docker build -t molecare-ml .
+docker image build -t molecare-ml .
 
 # run a new docker container named molecare-ml
 docker run --name molecare-ml \
