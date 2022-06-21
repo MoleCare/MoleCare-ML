@@ -118,6 +118,7 @@ wheel = "*"
 waitress = "*"
 injector = "*"
 google-cloud-storage = "*"
+uvicorn = "*"
 
 [dev-packages]
 

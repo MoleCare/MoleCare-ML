@@ -34,6 +34,7 @@ source .venv/bin/activate
 >source ./venv/bin/activate  # sh, bash, or zsh
 >python3 -m flask run
 >python -m flask run
+>python app.py
 
 # Install tensor flow serving
 https://www.tensorflow.org/tfx/serving/docker
@@ -62,15 +63,6 @@ https://flask-cors.readthedocs.io/en/latest/index.html
 > 
 
 # Package manager
-## pip requirements.txt
-pip supports package management through the requirements.txt file
-> pip install -e .
-> setup.py # contains dependencies, which are installed by cmd `pip install -e .`
-> pip list # observe that the project is now installed with pip list
-
->pip freeze > requirements.txt
->pip install -r requirements.txt
-
 ## pipenv
 Pipenv is a dependency manager that isolates projects on private environments, allowing packages to be installed per project.
 >python3 -m pip install pipenv
@@ -89,10 +81,17 @@ Or, add a package to your new project:
 >pipenv lock
 >pipenv lock --keep-outdated
 
-
-
 ## migrate from requirements.txt to pipenv
 >pipenv install -r requirements.txt
+## pip requirements.txt
+pip supports package management through the requirements.txt file
+> pip install -e .
+> setup.py # contains dependencies, which are installed by cmd `pip install -e .`
+> pip list # observe that the project is now installed with pip list
+
+>pip freeze > requirements.txt
+>pip install -r requirements.txt
+
 
 https://packaging.python.org/en/latest/tutorials/packaging-projects/
 # Build
@@ -131,4 +130,11 @@ Initialized the database.
 
 # Google Cloud Storage
 >pipenv install google-cloud-storage
+
+# Heroku
+- setup.sh: this file is necessary to handle the server and port number of our app on Heroku.
+- Procfile: this is the file of your configuration to tell Heroku how and which files to be executed
+
+
+
 
