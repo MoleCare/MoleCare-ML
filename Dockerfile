@@ -12,6 +12,7 @@ COPY Pipfile Pipfile.lock bootstrap-dev.sh ./
 
 # Install API dependencies
 RUN pip install --no-cache-dir pipenv
+RUN pipenv install
 
 # Copy every file in the source folder to the created working directory
 COPY  . .
@@ -19,4 +20,4 @@ COPY  . .
 # Start app
 EXPOSE 5000
 #ENTRYPOINT ["bootstrap-dev.sh"]
-CMD sh ./bootstrap-dev.sh
+CMD sh bootstrap-dev.sh
