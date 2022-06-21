@@ -1,14 +1,25 @@
 from flask import Flask, render_template, \
-    request, url_for, jsonify, \
-    Response, jsonify, make_response, \
-    abort, redirect, url_for
+    request, Response, jsonify, make_response, \
+    redirect, url_for
 from flask_cors import CORS, cross_origin
+from keras.activations import softmax
 from werkzeug.utils import secure_filename
-from markupsafe import escape
 import requests
 import base64
 from io import BytesIO
 import tensorflow as tf
+from keras.models import load_model
+from keras.utils import get_file
+from keras.utils import load_img
+from keras.utils import img_to_array
+from tensorflow import expand_dims
+from numpy import argmax
+from numpy import max
+from numpy import array
+from json import dumps
+from uvicorn import run
+import os
+
 from keras.applications import inception_v3
 from keras.preprocessing import image
 import json
@@ -17,7 +28,7 @@ import re
 from datetime import datetime
 import traceback
 
-from injector import inject
+class_predictions = array(['Melanoma, NotMelanoma'])
 
 app = Flask(__name__)
 #cross domain requests
@@ -50,11 +61,33 @@ def hello_there(name):
     content = "Hello there, " + clean_name + "! It's " + formatted_now
     return content
 
-@app.route('/upload', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        file = request.files['the_file']
-        file.save(f"/var/www/uploads/{secure_filename(file.filename)}")
+@app.route('/prediction/', methods=['POST'])
+async def get_net_image_prediction(image_link: str = ""):
+    if image_link == "":
+        return {"message": "No image link provided"}
+
+    img_path = get_file(
+        origin = image_link
+    )
+    img = load_img(
+        img_path,
+        target_size = (224, 224)
+    )
+
+    img_array = img_to_array(img)
+    img_array = expand_dims(img_array, 0)
+
+    pred = model.predict(img_array)
+    score = softmax(pred[0])
+
+    class_prediction = class_predictions[argmax(score)]
+    model_score = round(max(score) * 100, 2)
+    model_score = dumps(model_score.tolist())
+
+    return {
+        "model-prediction": class_prediction,
+        "model-prediction-confidence-score": model_score
+    }
 
 @app.route('/imageclassifier/predict/', methods=['POST'])
 def image_classifier():
@@ -104,5 +137,6 @@ def not_found(error):
 
 if __name__ == "__main__":
     from waitress import serve
-    serve(app, host="0.0.0.0", port=8080)
+    port = int(os.environ.get('PORT', 5000))
+    serve(app, host="0.0.0.0", port=port)
 

@@ -34,9 +34,6 @@ N
 tests/test.py,2/6/260c16d0c0db389dc861969f8c921f71efc023ae
 C
 docker-build-run.sh,8/8/88ecd6ad5a19a5eda238fea698f4de8d691e1de0
-:
-
-dockerfile,5/5/558c49b604560afd1841f2a7b49e2f60bd1f99b3
 W
 'src/tfserving/serving_sample_request.py,6/0/605a67b2fa16ba44e319e4eeef3c02afdd692714
 V
@@ -57,12 +54,8 @@ I
 	config.py,1/a/1a1b9769344cb239f2e540e1e6ee1efa2d3034ea
 8
 setup.py,8/e/8e2edce0d507e1297474f25c00cae94258db38d8
-A
-bootstrap-prod.sh,4/5/455b43214b225376ee8d3857bc48528589e3f44c
 ?
 src/__init__.py,b/1/b141e8a708cfc0de96ab25c59ca83087cbddf7fa
-@
-bootstrap-dev.sh,9/5/9505a19a9c53e5baec237eb7b6370366bbead5f0
 G
 src/service/__init__.py,a/d/adb61d720c7aba19520f46b72704788fc014824c
 J

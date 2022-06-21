@@ -1,5 +1,15 @@
->python3 -m venv venv
->source .venv/bin/activate
+# Run
+>docker image build -t molecare-ml .
+>docker run -p 5000:5000 -d molecare-ml
+
+# Stop
+>docker container stop <container-id>
+>docker system prune
+
+# Heroku
+> heroku login
+> heroku container:push web --app molecare-ml
+> heroku container:release web --app molecare-ml
 
 
 # MoleCare Melanoma CNN model with Rest API
