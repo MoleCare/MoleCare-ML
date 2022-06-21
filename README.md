@@ -34,7 +34,6 @@ source .venv/bin/activate
 >source ./venv/bin/activate  # sh, bash, or zsh
 >python3 -m flask run
 >python -m flask run
->python app.py
 
 # Install tensor flow serving
 https://www.tensorflow.org/tfx/serving/docker
