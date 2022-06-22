@@ -7,10 +7,12 @@
 >docker container stop <container-id>
 >docker system prune
 
-# Heroku
+# Heroku https://dashboard.heroku.com/apps/molecare-ml-api
 > heroku login
-> heroku container:push web --app molecare-ml
-> heroku container:release web --app molecare-ml
+> heroku container:login
+> heroku container:push web --app molecare-ml-api
+> heroku container:release web --app molecare-ml-api
+
 
 # Package manager
 ## pipenv
