@@ -42,9 +42,6 @@ Or, add a package to your new project:
 
 
 # Create environment macOS
-python3 -m venv .venv
-source .venv/bin/activate
-
 >python3 -m venv .venv
 >source .venv/bin/activate
 

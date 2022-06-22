@@ -1,4 +1,4 @@
-FROM python:3.7.3-alpine
+FROM python:3.7.3-stretch
 
 # Maintainer info
 LABEL maintainer="info@molecare.co.uk"
@@ -8,18 +8,18 @@ RUN mkdir -p /molecare-ml-api
 WORKDIR ./molecare-ml-api
 
 # Copy application dependencies to the created working directory
-#COPY Pipfile Pipfile.lock bootstrap-dev.sh ./
+COPY Pipfile Pipfile.lock bootstrap-dev.sh app.py ./
 # Copy every file in the source folder to the created working directory
-COPY . .
+# COPY . .
 
 # Install API dependencies
 #RUN apt -y update
 #RUN apt -y install curl
 RUN pip install --no-cache-dir pipenv
-RUN pipenv install
+RUN pipenv install --system --deploy --ignore-pipfile
 
 # Start app
 EXPOSE 5000
 #ENTRYPOINT ["bootstrap-dev.sh"]
-#CMD sh bootstrap-dev.sh
-CMD python -m flask run
+CMD sh bootstrap-dev.sh
+#CMD python -m flask run
