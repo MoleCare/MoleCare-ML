@@ -12,9 +12,27 @@
 > heroku container:push web --app molecare-ml
 > heroku container:release web --app molecare-ml
 
+# Package manager
+## pipenv
+Pipenv is a dependency manager that isolates projects on private environments, allowing packages to be installed per project.
+>python3 -m pip install pipenv
+>pipenv install requests
+
+Install from Pipfile, if there is one:
+>pipenv install
+
+Or, add a package to your new project:
+>pipenv install <package>
+
+>pipenv update
+>pipenv update --outdated
+
+### using lock
+>pipenv lock
+>pipenv lock --keep-outdated
+
 
 # MoleCare Melanoma CNN model with Rest API
-
 >python --version
 >pip --version
 >curl https://bootstrap.pypa.io/pip/2.7/get-pip.py | python
@@ -29,17 +47,6 @@ source .venv/bin/activate
 
 >python3 -m venv .venv
 >source .venv/bin/activate
-
->pip3 install matplotlib
->pip3 install imageai
->pip3 install tensorflow
->pip3 install pillow
->pip3 install numpy
->pip3 install opencv-python
-
->/Applications/Xcode.app/Contents/Developer/usr/bin/python3 -m pip install --upgrade pip
->pip3 install flask
-
 
 # How to run flask
 >source ./venv/bin/activate  # sh, bash, or zsh
