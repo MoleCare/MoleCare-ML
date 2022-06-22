@@ -118,6 +118,7 @@ waitress = "*"
 injector = "*"
 google-cloud-storage = "*"
 uvicorn = "*"
+pml = "*"
 
 [dev-packages]
 

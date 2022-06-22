@@ -1,6 +1,6 @@
 # Run
 >docker image build -t molecare-ml .
->docker run -p 5000:5000 -d molecare-ml
+>docker run -p 5000:5000 -e PORT=5000 -d molecare-ml
 >docker-build-run.sh
 
 # Stop
@@ -10,8 +10,11 @@
 # Heroku https://dashboard.heroku.com/apps/molecare-ml-api
 > heroku login
 > heroku container:login
-> heroku container:push web --app molecare-ml-api
-> heroku container:release web --app molecare-ml-api
+> heroku container:push molecare-ml --app molecare-ml-api
+> heroku container:release molecare-ml --app molecare-ml-api
+
+> heroku logs --tail --app molecare-ml-api
+
 
 
 # Package manager
