@@ -1,1 +1,1 @@
-web: sh setup.sh && streamlit run rps_app.py
+web: gunicorn main:app 0.0.0.0:$PORT

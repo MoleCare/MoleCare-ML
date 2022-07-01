@@ -1,3 +1,14 @@
+> gunicorn --bind 0.0.0.0:5000 main:app
+> docker build -t molecare-ml .
+> docker run -d -p 5001:5000 molecare-ml
+> docker ps
+> docker inspect <container id>
+    > docker inspect 74cffd781b1b | grep "IPAddress"
+> docker inspect 4e77bca22cb3 | grep "IPAddress"
+> 172.17.0.0/16
+> 192.168.65.0
+> kill -9 $(lsof -ti:5000)
+
 # Run
 >docker image build -t molecare-ml .
 >docker run -p 5000:5000 -e PORT=5000 -d molecare-ml
@@ -8,6 +19,7 @@
 >docker system prune
 
 # Heroku https://dashboard.heroku.com/apps/molecare-ml-api
+# https://molecare-ml-api.herokuapp.com/
 > heroku login
 > heroku container:login
 > heroku container:push molecare-ml --app molecare-ml-api
