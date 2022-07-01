@@ -21,9 +21,5 @@ A
 bootstrap-prod.sh,4/5/455b43214b225376ee8d3857bc48528589e3f44c
 C
 bootstrap-heroku.sh,4/4/4470a48b1c7b26e8f621544a8417f7379e290196
-7
-main.py,f/1/f1bdda93d9a278e358509d498e17d97764c1fb29
-8
-Procfile,b/c/bc3c68e880d1a01632bce79f69dd1387c7ba9c54
 C
 docker-build-run.sh,8/8/88ecd6ad5a19a5eda238fea698f4de8d691e1de0

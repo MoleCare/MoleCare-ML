@@ -1,5 +1,6 @@
-> gunicorn --bind 0.0.0.0:5000 main:app
+#CMD ["gunicorn"  , "--bind", "0.0.0.0:5000", "app:app"]
 > docker build -t molecare-ml .
+available through localhost:5001
 > docker run -d -p 5001:5000 molecare-ml
 > docker ps
 > docker inspect <container id>
@@ -24,10 +25,7 @@
 > heroku container:login
 > heroku container:push molecare-ml --app molecare-ml-api
 > heroku container:release molecare-ml --app molecare-ml-api
-
 > heroku logs --tail --app molecare-ml-api
-
-
 
 # Package manager
 ## pipenv

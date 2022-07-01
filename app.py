@@ -1,16 +1,12 @@
-from flask import Flask,\
-    request, jsonify, \
-    redirect, url_for
+from flask \
+    import Flask, redirect, url_for
 from flask_cors import CORS, cross_origin
-from numpy import array
 import os
 import re
 from datetime import datetime
-import traceback
-
-class_predictions = array(['Melanoma, NotMelanoma'])
 
 app = Flask(__name__)
+
 #cross domain requests
 CORS(app)
 
@@ -28,9 +24,6 @@ def home():
 def hello_there(name):
     now = datetime.now()
     formatted_now = now.strftime("%A, %d %B, %Y at %X")
-
-    # Filter the name argument to letters only using regular expressions. URL arguments
-    # can contain arbitrary text, so we restrict to safe characters only.
     match_object = re.match("[a-zA-Z]+", name)
 
     if match_object:
@@ -38,17 +31,15 @@ def hello_there(name):
     else:
         clean_name = "Friend"
 
-    content = "Hello there, " + clean_name + "! It's " + formatted_now
+    content = "Hello there, " + clean_name + \
+              "! It's " + formatted_now
     return content
-
-@app.errorhandler(Exception)
-def handle_exception(e):
-    return jsonify(stackTrace=traceback.format_exc())
 
 if __name__ == "__main__":
     from waitress import serve
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    port = int(os.environ.get("PORT", 5000))
+    print('port', port, sep=' : ')
+    app.run(debug=True, host='0.0.0.0', port=port)
     #serve(app, host="0.0.0.0", port=port)
 
 '''
@@ -117,4 +108,9 @@ async def get_net_image_prediction(image_link: str = ""):
         "model-prediction": class_prediction,
         "model-prediction-confidence-score": model_score
     }
+    
+    
+@app.errorhandler(Exception)
+def handle_exception(e):
+    return jsonify(stackTrace=traceback.format_exc())
 '''
