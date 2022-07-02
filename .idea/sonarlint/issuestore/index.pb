@@ -15,11 +15,20 @@ N
 setup.py,8/e/8e2edce0d507e1297474f25c00cae94258db38d8
 7
 Pipfile,1/5/15af4b3d30054104e85f65a444b1db188c5deefb
+G
+deploy/local/Dockerfile,1/2/12d1ec717e9a7a475f42d253622e963eaaa94950
+P
+ deploy/shell/docker-build-run.sh,e/4/e49728f64907a201c0d9cbcf15490ac9c81d8589
+N
+deploy/shell/bootstrap-prod.sh,2/f/2ff0baed0d4d994f219b9e8a8a85b6fd80b2b91e
+P
+ deploy/shell/bootstrap-heroku.sh,0/f/0f97403c6d5ef78633d4e6e1042651732392d939
+M
+deploy/shell/bootstrap-dev.sh,8/3/835d39333e3cac1712a94d585ca47de7a73f2ce6
+S
+#deploy/heroku/webapp/Dockerfile.web,7/3/7373b699aff05bc233332b5478e8fba64999852d
+:
+
+heroku.yml,e/6/e62b09eb9985c2b08f7a94d3bbe96af82ef9afda
 @
-bootstrap-dev.sh,9/5/9505a19a9c53e5baec237eb7b6370366bbead5f0
-A
-bootstrap-prod.sh,4/5/455b43214b225376ee8d3857bc48528589e3f44c
-C
-bootstrap-heroku.sh,4/4/4470a48b1c7b26e8f621544a8417f7379e290196
-C
-docker-build-run.sh,8/8/88ecd6ad5a19a5eda238fea698f4de8d691e1de0
+deploy/README.md,a/d/ad4614b5f51dc9af9b6a6c9689e292a99632e499

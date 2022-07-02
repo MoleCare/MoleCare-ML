@@ -7,7 +7,7 @@ RUN mkdir -p /molecare-ml-api
 WORKDIR ./molecare-ml-api
 
 # Copy application dependencies to the created working directory
-COPY Pipfile Pipfile.lock app.py heroku.yml Procfile ./
+COPY Pipfile Pipfile.lock app.py heroku.yml Procfile favicon.ico ./
 # Copy every file in the source folder to the created working directory
 #COPY . .
 
@@ -20,6 +20,7 @@ RUN pipenv install --system --deploy --ignore-pipfile
 
 # Start app
 #heroku
-CMD gunicorn app:app --bind 0.0.0.0:$PORT
+CMD gunicorn --bind 0.0.0.0:$PORT app:app
 # test
-# docker run -p 5000:5000 -e PORT=5000 molecare-ml
+# docker run -p 3453:5000 -e PORT=5000 molecare-ml
+# docker run -p 5001:3453 -e PORT=3453 molecare-ml
