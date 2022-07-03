@@ -21,11 +21,14 @@ available through localhost:5001
 
 # Heroku https://dashboard.heroku.com/apps/molecare-ml-api
 # https://molecare-ml-api.herokuapp.com/
+# https://devcenter.heroku.com/articles/container-registry-and-runtime
 > heroku login
 > heroku container:login
 > heroku container:push molecare-ml --app molecare-ml-api
 > heroku container:release molecare-ml --app molecare-ml-api
 > heroku logs --tail --app molecare-ml-api
+> heroku run bash -a molecare-ml-api
+
 
 # Package manager
 ## pipenv
@@ -164,6 +167,6 @@ Initialized the database.
 - setup.sh: this file is necessary to handle the server and port number of our app on Heroku.
 - Procfile: this is the file of your configuration to tell Heroku how and which files to be executed
 
-
-
+# Snyk
+Use 'docker scan' to run Snyk tests against images to find vulnerabilities and learn how to fix them
 
