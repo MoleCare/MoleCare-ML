@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.7.3-slim
 
 # Maintainer info
 LABEL maintainer="info@molecare.co.uk"
@@ -8,7 +8,7 @@ RUN mkdir -p /molecare-ml-api
 WORKDIR ./molecare-ml-api
 
 # Copy application dependencies to the created working directory
-COPY Pipfile Pipfile.lock app.py wsgi.py heroku.yml Procfile ./
+COPY Pipfile Pipfile.lock bootstrap-heroku.sh app.py main.py heroku.yml Procfile ./
 # Copy every file in the source folder to the created working directory
 #COPY . .
 
@@ -22,4 +22,10 @@ RUN pipenv install --system --deploy --ignore-pipfile
 # Start app
 #localhost
 EXPOSE 5000
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+
+#ENTRYPOINT ["bootstrap-dev.sh"]
+#CMD gunicorn --bind 0.0.0.0:$PORT wsgi
+#CMD gunicorn app:server --bind 0.0.0.0:$PORT --preload
+#CMD gunicorn --bind 0.0.0.0:$PORT
+#CMD gunicorn main:app --bind 0.0.0.0:5000
