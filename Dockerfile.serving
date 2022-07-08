@@ -1,4 +1,3 @@
 FROM tensorflow/serving
-COPY ./my_model/ /models/my_model/
-COPY ./detect_model/ /models/detect_model/
+COPY ./cnn-models/model_MobileNet_acc_0.99.h5 /models/
 COPY ./models.config /models/
