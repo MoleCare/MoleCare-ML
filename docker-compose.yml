@@ -1,0 +1,32 @@
+version: '3'
+
+services: 
+  tensorflow-serving:
+    build: 
+      context: ./services/tensorflow-serving
+      dockerfile: Dockerfile.serving
+    command:
+      - '--model_config_file=/models/model.config'
+    expose: 
+      - 8500-8501
+    depends_on: 
+      - web
+      
+  web:
+    build:
+      context: ./services/web/flask
+      dockerfile: Dockerfile.web
+    volumes: 
+      - sql_data:/app/database
+    command: gunicorn --bind 0.0.0.0:5000 manage:flask_app
+    expose:
+      - 5000
+  nginx:
+    build: 
+      context: ./services/nginx
+      dockerfile: Dockerfile.nginx
+    ports:
+      - 1337:443
+
+volumes:
+  sql_data:
