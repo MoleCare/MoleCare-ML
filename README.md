@@ -19,17 +19,6 @@ available through localhost:5001
 >docker container stop <container-id>
 >docker system prune
 
-# Heroku https://dashboard.heroku.com/apps/molecare-ml-api
-# https://molecare-ml-api.herokuapp.com/
-# https://devcenter.heroku.com/articles/container-registry-and-runtime
-> heroku login
-> heroku container:login
-> heroku container:push molecare-ml --app molecare-ml-api
-> heroku container:release molecare-ml --app molecare-ml-api
-> heroku logs --tail --app molecare-ml-api
-> heroku run bash -a molecare-ml-api
-
-
 # Package manager
 ## pipenv
 Pipenv is a dependency manager that isolates projects on private environments, allowing packages to be installed per project.
@@ -81,18 +70,6 @@ tensorflow_model_server --model_base_path=/home/ubuntu/Desktop/Medium/keras-and-
 --rest_api_port: Tensorflow Serving will start a gRPC ModelServer on port 8500 and the REST API will be available on port 9000.
 --model_name: This will be the name of your Serving server using which you will send a POST request. You can type any name you want here.
 
-
-The script basically mimics request from the frontend:
-
-We take an input image, encode it to base64 format and send it to our Flask server using POST request.
-Flask server decodes this base64 image and pre-processes it for our TensorFlow Serving server.
-Flask server then makes a POST request to our TensorFlow serving server and decodes the response.
-The decoded response is formatted and sent back to the frontend.
-
-# CORS
-https://flask-cors.readthedocs.io/en/latest/index.html
->pip install -U flask-cors
-> 
 
 # Package manager
 ## pipenv
@@ -163,10 +140,80 @@ Initialized the database.
 # Google Cloud Storage
 >pipenv install google-cloud-storage
 
-# Heroku
-- setup.sh: this file is necessary to handle the server and port number of our app on Heroku.
-- Procfile: this is the file of your configuration to tell Heroku how and which files to be executed
 
 # Snyk
 Use 'docker scan' to run Snyk tests against images to find vulnerabilities and learn how to fix them
+
+# AWS
+https://aws.amazon.com/blogs/opensource/deploying-python-flask-microservices-to-aws-using-open-source-tools/
+
+# step 1
+aws ecr create-repository \
+--repository-name molecare-ml-docker-app \
+--image-scanning-configuration scanOnPush=true \
+--region us-east-1
+
+## response
+    {
+        "repository": {
+            "repositoryArn": "arn:aws:ecr:us-east-1:417382966138:repository/molecare-ml-docker-app",
+            "registryId": "417382966138",
+            "repositoryName": "molecare-ml-docker-app",
+            "repositoryUri": "417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml-docker-app",
+            "createdAt": "2022-07-04T08:13:28+00:00",
+            "imageTagMutability": "MUTABLE",
+            "imageScanningConfiguration": {
+                "scanOnPush": true
+            },
+            "encryptionConfiguration": {
+                "encryptionType": "AES256"
+            }
+        }
+    }
+
+# step 2
+install AWS CLI
+https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+
+# step 3
+configure aws credentials
+https://aws.amazon.com/premiumsupport/knowledge-center/s3-locate-credentials-error/
+
+>aws configure list
+> aws configure --profile AWS
+
+AWSAccessKeyId=***REMOVED-AWS-ACCESS-KEY***
+AWSSecretKey=***REMOVED-AWS-SECRET-KEY***
+region=us-east-1
+format=text
+
+# step 5 aws cli login
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml-docker-app
+
+# step 6
+>docker build --tag molecare-ml .
+
+# step 7
+docker tag molecare-ml:latest 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml-docker-app:latest
+
+# step 8
+docker push 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml-docker-app
+
+# step 9
+set ec2
+>ssh -i molecare-ml-key-pair.pem ec2-user@ec2-YOUR-INSTANCE.compute-1.amazonaws.com
+
+# 10
+docker run
+> aws ecr describe-repositories
+> aws ecr describe-images --repository-name molecare-ml-docker-app
+
+docker login to ecr repo
+> aws ecr get-login-password --region us-east-1 | \
+docker login --username AWS --password-stdin \
+417382966138.dkr.ecr.us-east-1.amazonaws.com
+
+> docker pull 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml-docker-app:latest
+>docker run -d -p 5000:5000 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml-docker-app:latest
+> curl http://localhost:5000/hello/Yauhen
 
