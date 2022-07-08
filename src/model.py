@@ -3,7 +3,7 @@ import numpy as np
 import json
 import requests
 
-SIZE=128
+SIZE = 224
 MODEL_URI='http://localhost:8501/v1/models/pets:predict'
 CLASSES = ['Melanoma', 'NotMelanoma']
 
