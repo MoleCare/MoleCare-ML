@@ -119,6 +119,8 @@ injector = "*"
 google-cloud-storage = "*"
 uvicorn = "*"
 pml = "*"
+jsonify = "*"
+bytesbufio = "*"
 
 [dev-packages]
 

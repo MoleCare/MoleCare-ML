@@ -1,9 +1,11 @@
+from io import BytesIO
+
 from flask import Flask, redirect, url_for, \
     request
 from keras.preprocessing import image
 from flask_cors import CORS, cross_origin
 import os
-import model
+from src import model
 import requests
 import json
 import jsonify
@@ -68,7 +70,7 @@ def image_quality():
 
     # Decoding and pre-processing base64 image
     img = image.img_to_array(image.load_img(BytesIO(request.files["image"].read()),
-                                            target_size=(150, 150))) / 255.
+                                            target_size=(224, 224))) / 255.
 
     # this line is added because of a bug in tf_serving < 1.11
     img = img.astype('float16')
@@ -84,6 +86,8 @@ def image_quality():
     # Decoding results from TensorFlow Serving server
     pred = json.loads(r.content.decode('utf-8'))
 
+    percentage = np.array(pred['predictions'])[0] * 100
+
     pred = (np.array(pred['predictions'])[0] > 0.4).astype(np.int)
     if pred == 0:
         prediction = 'Bad'
@@ -91,12 +95,12 @@ def image_quality():
         prediction = 'Good'
 
     data["prediction"] = prediction
+    data["percent"] = percentage
 
     # Returning JSON response
     return jsonify({"status": 200, "message": 'No image passed', "data": data })
 
 if __name__ == "__main__":
-    from waitress import serve
     port = int(os.environ.get('PORT', 5000))
     #serve(app, host="0.0.0.0", port=port)
     app.run(host='0.0.0.0', port=port, debug=True)
