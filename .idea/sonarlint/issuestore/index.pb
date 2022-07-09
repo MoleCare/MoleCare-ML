@@ -1,7 +1,16 @@
 
-X
-(data/build-deploy/molecare-ml.dockerfile,7/c/7c7892090161b127f7a76c71f101f38ff9ca4199
-F
-data/docs/Run-Flask.md,2/f/2f88f7ea8ac5a8455b2b1ce2c330108fe6f062bf
-N
-data/build-deploy/bootstrap.sh,3/6/36036b6c239dde24a8452fc0dd15b7e4dc2ed733
+=
+.dockerignore,0/5/05a721ebe3ba0754116825ed1359ff1785f4bbac
+:
+
+.gitignore,a/5/a5cc2925ca8258af241be7e5b0381edf30266302
+G
+deploy/local/Dockerfile,1/2/12d1ec717e9a7a475f42d253622e963eaaa94950
+D
+deploy/aws/README.md,4/1/41e0f65a143c878ee915f2cb05d38867372ad3ab
+7
+Pipfile,1/5/15af4b3d30054104e85f65a444b1db188c5deefb
+E
+deploy/aws/Dockerfile,8/a/8a0e0b47efd0276a6bee0cef16df8da4bc69e1d4
+C
+docker-build-run.sh,8/8/88ecd6ad5a19a5eda238fea698f4de8d691e1de0

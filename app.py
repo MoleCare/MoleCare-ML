@@ -24,8 +24,8 @@ def index():
     content = "Hello, " + formatted_now
     return content
 
-@app.route('/', methods=['GET','POST'])
-def index():
+@app.route('/upload', methods=['GET','POST'])
+def upload():
     if request.method == 'POST':
         uploaded_file = request.files['file']
         if uploaded_file.filename != '':

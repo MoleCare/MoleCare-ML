@@ -6,7 +6,7 @@ services:
       context: ./
       dockerfile: Dockerfile.serving
     command:
-      - '--model_config_file=/models/model.config'
+      - '--model_config_file=/models/models.conf'
     expose: 
       - 8500-8501
     depends_on: 
@@ -18,7 +18,7 @@ services:
       dockerfile: Dockerfile.web
     volumes: 
       - sql_data:/app/database
-    command: gunicorn --bind 0.0.0.0:5000 manage:flask_app
+    command: gunicorn --bind 0.0.0.0:5000 wsgi
     expose:
       - 5000
   nginx:

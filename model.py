@@ -4,7 +4,7 @@ import json
 import requests
 
 SIZE = 224
-MODEL_URI='http://localhost:8501/v1/models/pets:predict'
+MODEL_URI='http://localhost:8501/v1/models/model_MobileNet_acc_0.99.h5:predict'
 CLASSES = ['Melanoma', 'NotMelanoma']
 
 def get_prediction(image_path):
