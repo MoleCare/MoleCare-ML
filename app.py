@@ -4,7 +4,7 @@ from flask import Flask, request
 from keras.preprocessing import image
 from flask_cors import CORS, cross_origin
 import os
-from src import model
+import model
 import requests
 import json
 import jsonify

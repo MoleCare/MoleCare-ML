@@ -1,4 +1,5 @@
-#CMD ["gunicorn"  , "--bind", "0.0.0.0:5000", "app:app"]
+>docker-compose up
+
 > docker build -t molecare-ml .
 available through localhost:5001
 > docker run -d -p 5001:5000 molecare-ml
@@ -107,10 +108,6 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 >python3 -m pip install --upgrade build
 >python3 -m build
 
-
-# Django vs Flask
-https://auth0.com/blog/developing-restful-apis-with-python-and-flask/
-
 # Run tests
 >pytest
 >coverage run -m pytest
@@ -121,25 +118,19 @@ https://auth0.com/blog/developing-restful-apis-with-python-and-flask/
 # Github
 >git push molecare main (molecare is origin repo, and main is master branch)
 
-
 export FLASK_APP=molecare-ml.application
 export FLASK_ENV=development
 flask run
 
-
-
 # Python distribution format is wheel with the .whl extension.
 >python setup.py bdist_wheel
-
 
 # Database
 Initialized the database.
 >flask init-db
 
-
 # Google Cloud Storage
 >pipenv install google-cloud-storage
-
 
 # Snyk
 Use 'docker scan' to run Snyk tests against images to find vulnerabilities and learn how to fix them
