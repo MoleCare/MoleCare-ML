@@ -1,0 +1,5 @@
+- docker system prune
+- docker system prune -a
+- docker volume prune
+- docker-compose up --build
+
