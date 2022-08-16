@@ -1,4 +1,5 @@
 >docker-compose up
+>http://localhost:1337/
 
 > docker build -t molecare-ml .
 available through localhost:5001
@@ -184,20 +185,38 @@ aws ecr get-login-password --region us-east-1 | docker login --username AWS --pa
 # step 6
 >docker build --tag molecare-ml .
 
+>docker context use default
+>docker build --tag molecare-ml_tensorflow-serving --file Dockerfile.serving .
+>docker build --tag molecare-ml_nginx --file Dockerfile.nginx .
+>docker build --tag molecare-ml_web --file Dockerfile.web .
+
 # step 7
 docker tag molecare-ml:latest 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml-docker-app:latest
 
+>docker tag molecare-ml_tensorflow-serving:latest 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml_tensorflow-serving:latest
+>docker tag molecare-ml_nginx:latest 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml_nginx:latest
+>docker tag molecare-ml_web:latest 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml_web:latest
+
 # step 8
 docker push 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml-docker-app
+## ecr should have the repos as molecare-ml_tensorflow-serving
+>docker push 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml_tensorflow-serving
+>docker push 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml_nginx
+>docker push 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml_web
 
 # step 9
 set ec2
+>chmod 700 molecare-ml-key-pair.pem
 >ssh -i molecare-ml-key-pair.pem ec2-user@ec2-YOUR-INSTANCE.compute-1.amazonaws.com
 
 # 10
 docker run
 > aws ecr describe-repositories
 > aws ecr describe-images --repository-name molecare-ml-docker-app
+
+>sudo chmode 777 .
+>sudo scp -i molecare-ml-key-pair.pem ~/DevBox/MoleCare-app/MoleCare-ML/*  ec2-user@ec2-YOUR-INSTANCE.compute-1.amazonaws.com:/
+>scp -i molecare-ml-key-pair.pem ~/DevBox/MoleCare-app/MoleCare-ML/*  ec2-user@ec2-YOUR-INSTANCE.compute-1.amazonaws.com:/
 
 docker login to ecr repo
 > aws ecr get-login-password --region us-east-1 | \
@@ -208,3 +227,8 @@ docker login --username AWS --password-stdin \
 >docker run -d -p 5000:5000 417382966138.dkr.ecr.us-east-1.amazonaws.com/molecare-ml-docker-app:latest
 > curl http://localhost:5000/hello/Yauhen
 
+## docker compose
+>docker compose build ml-docker-compose
+>docker tag ml-docker-compose:latest 417382966138.dkr.ecr.us-east-1.amazonaws.com/ml-docker-compose:latest
+docker compose push 417382966138.dkr.ecr.us-east-1.amazonaws.com/ml-docker-compose
+docker-compose push 417382966138.dkr.ecr.us-east-1.amazonaws.com/ml-docker-compose

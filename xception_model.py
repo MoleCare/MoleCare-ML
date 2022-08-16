@@ -4,13 +4,13 @@ import json
 import requests
 
 SIZE = 224
-MODEL_URI='http://localhost:8501/v1/models/model_MobileNet_acc_0.99.h5:predict'
+MODEL_URI = 'http://localhost:8501/v1/models/default:predict'
 CLASSES = ['Melanoma', 'NotMelanoma']
 
 def get_prediction(image_path):
     image = tf.keras.preprocessing.image.load_img(image_path, target_size=(SIZE, SIZE))
     image = tf.keras.preprocessing.image.img_to_array(image)
-    image = tf.keras.applications.mobilenet_v2.preprocess_input(image)
+    image = tf.keras.applications.xception.preprocess_input(image)
     image = np.expand_dims(image, axis=0)
 
     data = json.dumps({

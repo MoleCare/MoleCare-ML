@@ -4,7 +4,7 @@ from flask import Flask, request
 from keras.preprocessing import image
 from flask_cors import CORS, cross_origin
 import os
-import model
+import xception_model
 import requests
 import json
 import jsonify
@@ -24,30 +24,13 @@ def index():
     content = "Hello, " + formatted_now
     return content
 
-@app.route('/upload', methods=['GET','POST'])
-def upload():
-    if request.method == 'POST':
-        uploaded_file = request.files['file']
-        if uploaded_file.filename != '':
-            image_path = os.path.join('static', uploaded_file.filename)
-            uploaded_file.save(image_path)
-            class_name = model.get_prediction(image_path)
-            result = {
-                'class_name': class_name,
-                'image_path': image_path,
-            }
-            return result
-    return {'error': 'filename is empty string'}
-
-
-#r = requests.post('http://image-serving:8501/v1/models/qualitynet:predict', json=payload)
-# was "http://localhost:8501"
-@app.route('/image-quality')
-def image_quality():
+@app.route('/predict', methods=['GET', 'POST'])
+@cross_origin()
+def predict():
     data = {}
 
-    if not request.files["image"]:
-        return jsonify({"status": 400, "message": 'No image passed'})
+    request_body = request.get_json()
+    return request_body
 
     # Decoding and pre-processing base64 image
     img = image.img_to_array(image.load_img(BytesIO(request.files["image"].read()),
@@ -62,7 +45,7 @@ def image_quality():
     }
 
     # Making POST request
-    r = requests.post('http://localhost:8501/v1/models/qualitynet:predict', json=payload)
+    r = requests.post('http://localhost:8501/v1/models/default:predict', json=payload)
 
     # Decoding results from TensorFlow Serving server
     pred = json.loads(r.content.decode('utf-8'))
@@ -78,8 +61,7 @@ def image_quality():
     data["prediction"] = prediction
     data["percent"] = percentage
 
-    # Returning JSON response
-    return jsonify({"status": 200, "message": 'No image passed', "data": data })
+    return jsonify({"status": 200, "data": data})
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
