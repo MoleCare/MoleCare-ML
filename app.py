@@ -1,20 +1,22 @@
-from io import BytesIO
-
 from flask import Flask, request
-from keras.preprocessing import image
 from flask_cors import CORS, cross_origin
+import tensorflow as tf
 import os
-import xception_model
 import requests
 import json
-import jsonify
 import numpy as np
 from datetime import datetime
+from io import BytesIO
+import base64
+from PIL import Image
 
 app = Flask(__name__)
-
 #cross domain requests
 CORS(app)
+
+XCEPTION_INPUT_SHAPE_SIZE = 299
+MODEL_URI = 'http://localhost:8501/v1/models/default:predict'
+CLASSES = ['Melanoma', 'NotMelanoma']
 
 @app.route('/')
 @cross_origin()
@@ -24,41 +26,45 @@ def index():
     content = "Hello, " + formatted_now
     return content
 
-@app.route('/predict', methods=['GET', 'POST'])
+@app.route('/predict', methods=['POST'])
 @cross_origin()
 def predict():
     data = {}
 
     request_body = request.get_json()
-    return request_body
+    imagebase64 = request_body['imagebase64']
 
-    # Decoding and pre-processing base64 image
-    img = image.img_to_array(image.load_img(BytesIO(request.files["image"].read()),
-                                            target_size=(224, 224))) / 255.
+    print(imagebase64)
+
+    imagePath = './test.jpeg'
+    img = Image.open(BytesIO(base64.decodebytes(bytes(imagebase64, "utf-8"))))
+    img.save(imagePath, 'jpeg')
+
+    input_image = tf.keras.preprocessing.image.load_img(imagePath)
+
+    os.remove(imagePath);
+
+    input_image = tf.image.resize(input_image,
+                                  [XCEPTION_INPUT_SHAPE_SIZE,XCEPTION_INPUT_SHAPE_SIZE])
+    input_image = tf.keras.preprocessing.image.img_to_array(input_image)
+    input_image = tf.keras.applications.xception.preprocess_input(input_image)
+    input_image = np.expand_dims(input_image, axis=0)
 
     # this line is added because of a bug in tf_serving < 1.11
-    img = img.astype('float16')
+    input_image = input_image.astype('float16')
 
-    # Creating payload for TensorFlow serving request
     payload = {
-        "instances": [{'input_image': img.tolist()}]
+        "instances": [{'input_image': input_image.tolist()}]
     }
 
-    # Making POST request
-    r = requests.post('http://localhost:8501/v1/models/default:predict', json=payload)
+    r = requests.post('http://localhost:8501/v1/models/default:predict', json = payload)
 
-    # Decoding results from TensorFlow Serving server
-    pred = json.loads(r.content.decode('utf-8'))
+    result = json.loads(r.text)
+    prediction = np.squeeze(result['predictions'][0])
+    class_name = CLASSES[int(prediction > 0.5)]
+    percentage = prediction * 100
 
-    percentage = np.array(pred['predictions'])[0] * 100
-
-    pred = (np.array(pred['predictions'])[0] > 0.4).astype(np.int)
-    if pred == 0:
-        prediction = 'Bad'
-    else:
-        prediction = 'Good'
-
-    data["prediction"] = prediction
+    data["prediction"] = class_name
     data["percent"] = percentage
 
     return jsonify({"status": 200, "data": data})
