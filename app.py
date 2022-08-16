@@ -1,5 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
+import jsonify
 import tensorflow as tf
 import os
 import requests
@@ -42,12 +43,12 @@ def predict():
 
     input_image = tf.keras.preprocessing.image.load_img(imagePath)
 
-    os.remove(imagePath);
+    os.remove(imagePath)
 
     input_image = tf.image.resize(input_image,
-                                  [XCEPTION_INPUT_SHAPE_SIZE,XCEPTION_INPUT_SHAPE_SIZE])
+                                  [XCEPTION_INPUT_SHAPE_SIZE, XCEPTION_INPUT_SHAPE_SIZE])
     input_image = tf.keras.preprocessing.image.img_to_array(input_image)
-    input_image = tf.keras.applications.xception.preprocess_input(input_image)
+    #input_image = tf.keras.applications.xception.preprocess_input(input_image)
     input_image = np.expand_dims(input_image, axis=0)
 
     # this line is added because of a bug in tf_serving < 1.11
@@ -57,9 +58,11 @@ def predict():
         "instances": [{'input_image': input_image.tolist()}]
     }
 
-    r = requests.post('http://localhost:8501/v1/models/default:predict', json = payload)
+    print(payload)
 
-    result = json.loads(r.text)
+    response = requests.post('http://localhost:8502/v1/models/xception:predict', json = payload)
+
+    result = json.loads(response.text)
     prediction = np.squeeze(result['predictions'][0])
     class_name = CLASSES[int(prediction > 0.5)]
     percentage = prediction * 100
