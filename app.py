@@ -1,6 +1,5 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
-import jsonify
 import tensorflow as tf
 import os
 import requests
@@ -45,23 +44,25 @@ def predict():
     input_image = input_image.astype('float16')
 
     payload = {
-        "instances": [{'input_image': input_image.tolist()}]
+        "instances": [{"input_image": input_image.tolist()}]
     }
 
     print(URL_SERVING)
     response = requests.post(URL_SERVING, json=payload)
 
     result = json.loads(response.text)
-    prediction = result['predictions'][0]
-    class_name = CLASSES[int(prediction > 0.5)]
-    class_name = CLASSES[int(prediction > 0.5)]
-    percentage = prediction * 100
+    print("============")
+    print(result)
+    print("============")
+    #prediction = result['predictions'][0]
+    #class_name = CLASSES[int(prediction > 0.5)]
+    #percentage = prediction * 100
 
     response_body = {}
-    response_body["prediction"] = class_name
-    response_body["percent"] = percentage
+    #response_body["prediction"] = class_name
+    #response_body["percent"] = percentage
 
-    return jsonify({"status": 200, "data": response_body})
+    return jsonify({"status": 200, "data": result})
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
