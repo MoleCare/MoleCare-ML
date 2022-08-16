@@ -43,12 +43,10 @@ def predict():
     # this line is added because of a bug in tf_serving < 1.11
     input_image = input_image.astype('float16')
 
-    payload = {
-        "instances": [{"input_image": input_image.tolist()}]
-    }
+    payload = json.dumps({'instances': input_image.tolist()})
 
     print(URL_SERVING)
-    response = requests.post(URL_SERVING, json=payload)
+    response = requests.post(URL_SERVING, data=payload.encode())
 
     result = json.loads(response.text)
     print("============")
