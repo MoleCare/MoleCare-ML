@@ -7,26 +7,8 @@ services:
       dockerfile: Dockerfile.serving
     command:
       - '--model_config_file=/models/models.conf'
-    expose: 
-      - 8501
-    depends_on: 
-      - web
-      
-  web:
-    build:
-      context: ./
-      dockerfile: Dockerfile.web
-    volumes: 
-      - sql_data:/app/database
-    command: gunicorn --bind 0.0.0.0:5000 wsgi
-    expose:
-      - 5000
-  nginx:
-    build: 
-      context: ./
-      dockerfile: Dockerfile.nginx
     ports:
-      - 1337:80
+      - 8501:8501
 
 volumes:
   sql_data:

@@ -15,9 +15,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-utils \
     && apt-get -y install curl \
     && apt-get install libgomp1
 RUN pip install --no-cache-dir pipenv
-RUN pipenv install --system --deploy --ignore-pipfile
+#RUN pipenv install --deploy --ignore-pipfile --system
+RUN python3 -m venv .venv
+RUN pipenv sync
 
 # Start app
-#localhost
 EXPOSE 5000
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "300", "wsgi"]

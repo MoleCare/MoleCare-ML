@@ -55,9 +55,11 @@ Or, add a package to your new project:
 >source .venv/bin/activate
 
 # How to run flask
->source ./venv/bin/activate  # sh, bash, or zsh
+>source ./venv/bin/activate
 >python3 -m flask run
+> 
 >python -m flask run
+>gunicorn --bind 0.0.0.0:5000 --timeout 240 wsgi
 
 # Install tensor flow serving
 https://www.tensorflow.org/tfx/serving/docker
@@ -66,12 +68,6 @@ https://www.tensorflow.org/tfx/serving/docker
 >tensorflow_model_server --port=8500 --rest_api_port=8501 \
 --model_name=${MODEL_NAME} --model_base_path=${MODEL_BASE_PATH}/${MODEL_NAME}  ex: tensorflow_model_server --port=8500 --rest_api_port=8501 \
 --model_name=${MODEL_NAME} --model_base_path=/models/model
-
-tensorflow_model_server --model_base_path=/home/ubuntu/Desktop/Medium/keras-and-tensorflow-serving/my_image_classifier --rest_api_port=9000 --model_name=ImageClassifier
-
---rest_api_port: Tensorflow Serving will start a gRPC ModelServer on port 8500 and the REST API will be available on port 9000.
---model_name: This will be the name of your Serving server using which you will send a POST request. You can type any name you want here.
-
 
 # Package manager
 ## pipenv
@@ -125,16 +121,6 @@ flask run
 
 # Python distribution format is wheel with the .whl extension.
 >python setup.py bdist_wheel
-
-# Database
-Initialized the database.
->flask init-db
-
-# Google Cloud Storage
->pipenv install google-cloud-storage
-
-# Snyk
-Use 'docker scan' to run Snyk tests against images to find vulnerabilities and learn how to fix them
 
 # AWS
 https://aws.amazon.com/blogs/opensource/deploying-python-flask-microservices-to-aws-using-open-source-tools/
