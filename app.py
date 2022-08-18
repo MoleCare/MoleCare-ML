@@ -12,8 +12,6 @@ app = Flask(__name__)
 CORS(app)
 
 XCEPTION_INPUT_SHAPE_SIZE = 299
-#URL_SERVING = 'http://tensorflow-serving:8501/v1/models/melanoma/1:predict'
-URL_SERVING = 'http://localhost:8501/v1/models/melanoma/1:predict'
 CLASSES = ['NotMelanoma', 'Melanoma']
 
 @app.route('/')
@@ -42,12 +40,6 @@ def predict():
     input_image = tf.keras.applications.xception.preprocess_input(input_image)
     input_image = np.expand_dims(input_image, axis=0)
 
-    #input_image = tf.keras.preprocessing.image.load_img(image_path)
-    #input_image = np.array(input_image)
-    #input_image = tf.image.resize(input_image,
-     #                             [XCEPTION_INPUT_SHAPE_SIZE, XCEPTION_INPUT_SHAPE_SIZE])
-
-    #input_image = np.expand_dims(input_image, axis=0)
     # this line is added because of a bug in tf_serving < 1.11
     input_image = input_image.astype('float16')
 
@@ -55,14 +47,6 @@ def predict():
     prediction_res = model.predict(input_image.tolist())
     print("prediction shape:", prediction_res)
 
-    #encoded_input_string = base64.b64encode(input_image)
-    #input_string = encoded_input_string.decode("utf-8")
-    #instance = [{"b64": input_string}]
-    #payload = json.dumps({"instances": instance})
-    #response = requests.post(URL_SERVING, data=payload)
-
-    #result = json.loads(response.text)
-    print(prediction_res)
     prediction = prediction_res[0][0]
     class_name = CLASSES[int(prediction > 0.5)]
     percentage = prediction * 100
