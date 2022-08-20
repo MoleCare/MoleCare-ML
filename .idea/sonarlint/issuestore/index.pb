@@ -39,9 +39,3 @@ J
 doc/app-with-tf-serving.py,2/3/237411aca6dcdb36ae48e372809414de6b13cf07
 6
 app.py,1/3/13cce7fd076299c81b4986166f3d822791c9490e
->
-Dockerfile.web,5/9/590651787d76bb4f617d674cd3b7761240d06158
-9
-	README.md,8/e/8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d
-7
-Pipfile,1/5/15af4b3d30054104e85f65a444b1db188c5deefb
