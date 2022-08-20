@@ -25,15 +25,23 @@ H
 nginx.conf,e/d/ed8b45da44d73de79bd7c1c203a419d6ee7d6fde
 >
 doc/serving.md,c/7/c7f548eeae69d9d95b1a149094a45bdb0dd89e28
-7
-Pipfile,1/5/15af4b3d30054104e85f65a444b1db188c5deefb
 T
 $cnn-models/xception/1/saved_model.pb,0/4/046234c3ab21017eb7cbe7291e1da086306e1487
 W
 'cnn-models/xception/1/keras_metadata.pb,a/b/abcddadca2c14600d78059db394d15b44cc2caef
 B
 Dockerfile.serving,b/9/b90a4a96a2bb02d3126ed90b469f93da9402d48f
->
-Dockerfile.web,5/9/590651787d76bb4f617d674cd3b7761240d06158
 ;
 models.conf,b/a/ba248edb46797475b8a281c3a3af2ea523456421
+B
+docker-compose.yml,3/5/35b8c13cf2eb2a194eada000eb310d65aed53b2a
+J
+doc/app-with-tf-serving.py,2/3/237411aca6dcdb36ae48e372809414de6b13cf07
+6
+app.py,1/3/13cce7fd076299c81b4986166f3d822791c9490e
+>
+Dockerfile.web,5/9/590651787d76bb4f617d674cd3b7761240d06158
+9
+	README.md,8/e/8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d
+7
+Pipfile,1/5/15af4b3d30054104e85f65a444b1db188c5deefb

@@ -40,8 +40,6 @@ Or, add a package to your new project:
 >pipenv lock
 >pipenv lock --keep-outdated
 
-
-# MoleCare Melanoma CNN model with Rest API
 >python --version
 >pip --version
 >curl https://bootstrap.pypa.io/pip/2.7/get-pip.py | python
@@ -59,7 +57,7 @@ Or, add a package to your new project:
 >python3 -m flask run
 > 
 >python -m flask run
->gunicorn --bind 0.0.0.0:5000 --timeout 240 wsgi
+>gunicorn --bind 0.0.0.0:5000 --timeout 300 wsgi
 
 # Install tensor flow serving
 https://www.tensorflow.org/tfx/serving/docker
