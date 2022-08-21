@@ -1,4 +1,6 @@
-from flask import Flask, request, jsonify
+from http.client import HTTPException
+
+from flask import Flask, request, jsonify, json
 from flask_cors import CORS, cross_origin
 import tensorflow as tf
 import os
@@ -56,6 +58,19 @@ def predict():
     response_body["percent"] = percentage
 
     return jsonify({"status": 200, "data": response_body})
+
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+    response = e.get_response()
+
+    response.data = json.dumps({
+        "code": e.code,
+        "name": e.name,
+        "description": e.description,
+    })
+
+    response.content_type = "application/json"
+    return response
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))

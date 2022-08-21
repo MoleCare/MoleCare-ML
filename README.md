@@ -1,4 +1,6 @@
->docker-compose up
+gunicorn --bind 0.0.0.0:5000 --timeout 300 wsgi
+
+> >docker-compose up
 >http://localhost:1337/
 
 > docker build -t molecare-ml .
