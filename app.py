@@ -25,7 +25,9 @@ def index():
 @cross_origin()
 def predict():
     request_body = request.get_json()
-    image_base64 = request_body['imagebase64']
+    print("request: " + request.get_json())
+    predictionId = request_body["predictionid"]
+    image_base64 = request_body["imagebase64"]
     image_path = './test.jpeg'
 
     if os.path.exists(image_path):
@@ -56,6 +58,7 @@ def predict():
     response_body = {}
     response_body["prediction"] = class_name
     response_body["percent"] = percentage
+    response_body["predicionid"] = predictionId
 
     return jsonify({"status": 200, "data": response_body})
 
