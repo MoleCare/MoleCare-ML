@@ -25,10 +25,12 @@ def index():
 @cross_origin()
 def predict():
     request_body = request.get_json()
-    print("request data: ", request.get_data())
-    print("request json: ", request_body)
+
     predictionId = request_body["predictionid"]
     image_base64 = request_body["imagebase64"]
+
+    print("predictionId: ", predictionId)
+
     image_path = './test.jpeg'
 
     if os.path.exists(image_path):
