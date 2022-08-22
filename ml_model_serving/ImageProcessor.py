@@ -10,7 +10,7 @@ class ImageProcessor:
 
     XCEPTION_INPUT_SHAPE_SIZE = 299
 
-    def prepare_input_image(image_base64):
+    def prepare_input_image(self, image_base64):
         image_path = './test.jpeg'
 
         if os.path.exists(image_path):
