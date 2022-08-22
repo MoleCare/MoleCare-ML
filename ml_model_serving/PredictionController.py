@@ -6,8 +6,8 @@ from flask_cors import CORS, cross_origin
 import os
 
 from ml_model_serving.ImageProcessor import ImageProcessor
-from ml_model_serving.ModelPrediction import ModelPrediction
-from ml_model_serving.validator import Validator
+from ml_model_serving.ModelPredictionService import ModelPrediction
+from ml_model_serving.Validator import Validator
 
 # cross domain requests
 CORS(app)
