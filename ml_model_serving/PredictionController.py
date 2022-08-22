@@ -6,7 +6,7 @@ from flask_cors import CORS, cross_origin
 import os
 
 from ml_model_serving.ImageProcessor import ImageProcessor
-from ml_model_serving.ModelPredictionService import ModelPrediction
+from ml_model_serving.ModelPredictionService import ModelPredictionService
 from ml_model_serving.Validator import Validator
 
 # cross domain requests
@@ -32,12 +32,12 @@ def predict():
     if validator.validate(prediction_id, image_base64) is False:
         abort(400)
 
-    print("predictionId: ", prediction_id)
+    app.logger.info('predictionId: %s', prediction_id)
 
     imageProcessor = ImageProcessor()
     input_image = imageProcessor.prepare_input_image(image_base64)
 
-    modelPrediction = ModelPrediction()
+    modelPrediction = ModelPredictionService()
     prediction_res = modelPrediction.predict_model(input_image)
 
     prediction = prediction_res[0][0]
