@@ -2,6 +2,8 @@ pip install mod-wsgi-httpd
 pip install mod-wsgi
 pip install gunicorn
 
+https://testdriven.io/blog/flask-contexts-advanced/ 
+
 pipenv shell
 gunicorn --bind 0.0.0.0:5000 --timeout 300 wsgi
 ps ax|grep gunicorn

@@ -1,1 +1,1 @@
-from app import app as application
+from ml_model_serving import app as application

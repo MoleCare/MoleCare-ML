@@ -3,7 +3,7 @@ version: '3'
 services: 
   tensorflow-serving:
     build: 
-      context: ./
+      context: ..
       dockerfile: Dockerfile.serving
     command:
       - '--model_config_file=/models/models.conf'
@@ -14,7 +14,7 @@ services:
       
   web:
     build:
-      context: ./
+      context: ..
       dockerfile: Dockerfile.web
     volumes: 
       - sql_data:/app/database
@@ -23,7 +23,7 @@ services:
       - 5000
   nginx:
     build: 
-      context: ./
+      context: ..
       dockerfile: Dockerfile.nginx
     ports:
       - 1337:80

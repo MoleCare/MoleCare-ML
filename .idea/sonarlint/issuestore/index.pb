@@ -10,8 +10,6 @@ D
 deploy/aws/README.md,4/1/41e0f65a143c878ee915f2cb05d38867372ad3ab
 E
 deploy/aws/Dockerfile,8/a/8a0e0b47efd0276a6bee0cef16df8da4bc69e1d4
-7
-wsgi.py,4/9/491d41343a6a914bfa8b19169cde1c8086bdb8b7
 C
 docker-build-run.sh,8/8/88ecd6ad5a19a5eda238fea698f4de8d691e1de0
 H
