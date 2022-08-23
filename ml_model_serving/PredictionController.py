@@ -4,15 +4,12 @@ from flask import request, jsonify, json, abort
 from werkzeug.exceptions import HTTPException
 from flask_cors import CORS, cross_origin
 import os
-
 from ml_model_serving.ImageProcessor import ImageProcessor
 from ml_model_serving.ModelPredictionService import ModelPredictionService
 from ml_model_serving.Validator import Validator
 
 # cross domain requests
 CORS(app)
-
-CLASSES = ['NotMelanoma', 'Melanoma']
 
 
 @app.route('/')
@@ -36,17 +33,13 @@ def predict():
 
     imageProcessor = ImageProcessor()
     input_image = imageProcessor.prepare_input_image(image_base64)
-
     modelPrediction = ModelPredictionService()
     prediction_res = modelPrediction.predict_model(input_image)
-
-    prediction = prediction_res[0][0]
-    # class_name = CLASSES[int(prediction > 0.5)]
-    percentage = prediction * 100
+    prediction_value = prediction_res[0][0]
+    prediction_percent = prediction_value * 100
 
     response_body = {}
-    # response_body["prediction"] = class_name
-    response_body["percent"] = percentage
+    response_body["percent"] = prediction_percent
     response_body["predictionid"] = prediction_id
 
     return jsonify({"status": 200, "data": response_body})
@@ -69,5 +62,4 @@ def handle_exception(e):
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
-    # serve(app, host="0.0.0.0", port=port)
     app.run(host='0.0.0.0', port=port, debug=True)
