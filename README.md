@@ -5,10 +5,10 @@ pip install gunicorn
 https://testdriven.io/blog/flask-contexts-advanced/
 https://python-dependency-injector.ets-labs.org/tutorials/flask.html 
 
-pipenv shell
-gunicorn --bind 0.0.0.0:5000 --timeout 300 wsgi
-ps ax|grep gunicorn
-kill -9 7926
+>pipenv shell
+>gunicorn --bind 0.0.0.0:5000 --timeout 300 wsgi
+>ps ax|grep gunicorn
+>kill -9 7926
 
 > >docker-compose up
 >http://localhost:1337/

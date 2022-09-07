@@ -31,10 +31,11 @@ def predict():
 
     app.logger.info('predictionId: %s', prediction_id)
 
-    imageProcessor = ImageProcessor()
-    input_image = imageProcessor.prepare_input_image(image_base64)
-    modelPrediction = ModelPredictionService()
-    prediction_res = modelPrediction.predict_model(input_image)
+    image_processor = ImageProcessor()
+    input_image = image_processor.prepare_input_image(image_base64)
+    model_prediction = ModelPredictionService()
+    prediction_res = model_prediction.predict_model(input_image)
+    app.logger.info('prediction: %s', prediction_res)
     prediction_value = prediction_res[0][0]
     prediction_percent = prediction_value * 100
 
