@@ -16,6 +16,9 @@ class ImageProcessor:
         if os.path.exists(image_path):
             os.remove(image_path)
 
+        if "," in image_base64:
+            image_base64 = image_base64.split(",")[1]
+
         with Image.open(BytesIO(base64.decodebytes(bytes(image_base64, "utf-8")))) as img:
             img.save(image_path, 'jpeg')
 
