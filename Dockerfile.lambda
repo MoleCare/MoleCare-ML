@@ -1,0 +1,37 @@
+# Lambda Container Image for Melanoma Prediction
+# Based on AWS Lambda Python 3.9 base image
+
+FROM public.ecr.aws/lambda/python:3.9
+
+# Install system dependencies
+RUN yum install -y \
+    gcc \
+    libjpeg-turbo-devel \
+    zlib-devel \
+    && yum clean all
+
+# Set working directory
+WORKDIR ${LAMBDA_TASK_ROOT}
+
+# Copy requirements and install Python dependencies
+COPY Pipfile Pipfile.lock ./
+
+# Install pipenv and convert to requirements.txt, then install
+RUN pip install --no-cache-dir pipenv && \
+    pipenv requirements > requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir metaflow wandb && \
+    rm -rf /root/.cache/pip
+
+# Copy application code
+COPY ml_model_serving/ ${LAMBDA_TASK_ROOT}/ml_model_serving/
+COPY handler.py ${LAMBDA_TASK_ROOT}/
+
+# Copy the trained model
+COPY cnn-models/ ${LAMBDA_TASK_ROOT}/cnn-models/
+
+# Set model path environment variable
+ENV MODEL_PATH=${LAMBDA_TASK_ROOT}/cnn-models/xception/1/
+
+# Set the Lambda handler
+CMD ["handler.predict"]
