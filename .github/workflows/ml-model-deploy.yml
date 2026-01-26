@@ -52,7 +52,7 @@ on:
         type: string
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: eu-west-2
   ECR_REPOSITORY: molecare-ml
   PYTHON_VERSION: '3.9'
 
@@ -300,17 +300,17 @@ jobs:
       - name: Deploy to Lambda (Production)
         run: |
           aws lambda update-function-code \
-            --function-name molecare-ml-prod \
+            --function-name molecare-ml-production \
             --image-uri ${{ needs.build.outputs.image_uri }}
 
           aws lambda wait function-updated \
-            --function-name molecare-ml-prod
+            --function-name molecare-ml-production
 
       - name: Publish Lambda version
         id: publish-version
         run: |
           VERSION=$(aws lambda publish-version \
-            --function-name molecare-ml-prod \
+            --function-name molecare-ml-production \
             --description "Production: ${{ github.sha }}" \
             --query 'Version' \
             --output text)
@@ -333,7 +333,7 @@ jobs:
           ERROR_COUNT=$(aws cloudwatch get-metric-statistics \
             --namespace AWS/Lambda \
             --metric-name Errors \
-            --dimensions Name=FunctionName,Value=molecare-ml-prod \
+            --dimensions Name=FunctionName,Value=molecare-ml-production \
             --start-time $(date -u -v-5M +%Y-%m-%dT%H:%M:%SZ) \
             --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
             --period 300 \
@@ -423,7 +423,7 @@ jobs:
         id: function
         run: |
           if [ "${{ inputs.environment }}" == "production" ]; then
-            echo "name=molecare-ml-prod" >> $GITHUB_OUTPUT
+            echo "name=molecare-ml-production" >> $GITHUB_OUTPUT
           else
             echo "name=molecare-ml-staging" >> $GITHUB_OUTPUT
           fi
@@ -516,7 +516,7 @@ jobs:
         id: function
         run: |
           if [ "${{ inputs.environment }}" == "production" ]; then
-            echo "name=molecare-ml-prod" >> $GITHUB_OUTPUT
+            echo "name=molecare-ml-production" >> $GITHUB_OUTPUT
           else
             echo "name=molecare-ml-staging" >> $GITHUB_OUTPUT
           fi
