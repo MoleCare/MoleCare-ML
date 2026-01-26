@@ -28,6 +28,14 @@ except ImportError as e:
     logging.warning(f"Detection modules not available: {e}")
     DETECTION_AVAILABLE = False
 
+# Import Derm Foundation (Google Health AI) module
+try:
+    from ml_model_serving.DermFoundationService import DermFoundationService
+    DERM_FOUNDATION_AVAILABLE = True
+except ImportError as e:
+    logging.warning(f"Derm Foundation module not available: {e}")
+    DERM_FOUNDATION_AVAILABLE = False
+
 # cross domain requests
 CORS(app)
 
@@ -35,6 +43,7 @@ CORS(app)
 _mole_analysis_service = None
 _mole_detection_service = None
 _evolution_analysis_service = None
+_derm_foundation_service = None
 
 def get_mole_analysis_service():
     """Lazy initialization of MoleAnalysisService."""
@@ -57,11 +66,99 @@ def get_evolution_analysis_service():
         _evolution_analysis_service = EvolutionAnalysisService()
     return _evolution_analysis_service
 
+def get_derm_foundation_service():
+    """Lazy initialization of DermFoundationService."""
+    global _derm_foundation_service
+    if _derm_foundation_service is None and DERM_FOUNDATION_AVAILABLE:
+        _derm_foundation_service = DermFoundationService()
+    return _derm_foundation_service
+
+
+# Legal disclaimer included in all advanced analysis responses
+MEDICAL_DISCLAIMER = (
+    'This analysis is for informational purposes only and does not constitute '
+    'medical advice or diagnosis. This tool uses Google Health AI Developer '
+    'Foundations under their Terms of Use. Always consult a qualified '
+    'healthcare professional for medical concerns.'
+)
+
 
 @app.route('/')
 @cross_origin()
 def index():
     return "Working"
+
+
+@app.route('/health', methods=['GET'])
+@cross_origin()
+def health_check():
+    """Comprehensive health check for all ML services."""
+    import time as time_module
+    start_time = time_module.time()
+
+    health = {
+        'status': 'healthy',
+        'services': {}
+    }
+
+    # Check Xception model
+    try:
+        model = ModelPredictionService()
+        health['services']['xception'] = {'status': 'up', 'type': 'baseline'}
+    except Exception as e:
+        health['services']['xception'] = {'status': 'down', 'error': str(e)}
+        health['status'] = 'degraded'
+
+    # Check ABCDE analyzer
+    health['services']['abcde'] = {
+        'status': 'up' if ABCDE_AVAILABLE else 'unavailable',
+        'type': 'analysis'
+    }
+
+    # Check Detection service
+    health['services']['detection'] = {
+        'status': 'up' if DETECTION_AVAILABLE else 'unavailable',
+        'type': 'detection'
+    }
+
+    # Check Derm Foundation (premium)
+    if DERM_FOUNDATION_AVAILABLE:
+        try:
+            derm = get_derm_foundation_service()
+            if derm and derm.is_available():
+                health['services']['derm_foundation'] = {
+                    'status': 'up',
+                    'type': 'advanced',
+                    'premium': True
+                }
+            else:
+                health['services']['derm_foundation'] = {
+                    'status': 'loading',
+                    'type': 'advanced',
+                    'premium': True
+                }
+        except Exception as e:
+            health['services']['derm_foundation'] = {
+                'status': 'down',
+                'error': str(e),
+                'premium': True
+            }
+    else:
+        health['services']['derm_foundation'] = {
+            'status': 'unavailable',
+            'type': 'advanced',
+            'premium': True,
+            'note': 'Install huggingface_hub and configure access to enable'
+        }
+
+    # If Xception is down, the whole service is unhealthy
+    if health['services']['xception'].get('status') == 'down':
+        health['status'] = 'unhealthy'
+
+    health['response_time_ms'] = int((time_module.time() - start_time) * 1000)
+
+    status_code = 200 if health['status'] != 'unhealthy' else 503
+    return jsonify(health), status_code
 
 
 @app.route('/predict', methods=['POST'])
@@ -507,6 +604,180 @@ def validate_image():
     except Exception as e:
         app.logger.error('Validation error: %s\n%s', str(e), traceback.format_exc())
         abort(500, description=f"Validation failed: {str(e)}")
+
+
+@app.route('/predict-advanced', methods=['POST'])
+@cross_origin()
+def predict_advanced():
+    """Advanced melanoma prediction using Google Derm Foundation model.
+
+    This is a premium feature that uses dermatology-specific embeddings
+    for improved accuracy over the baseline Xception model.
+    """
+    if not DERM_FOUNDATION_AVAILABLE:
+        abort(503, description="Derm Foundation model not available")
+
+    try:
+        request_body = request.get_json()
+        validator = Validator()
+
+        prediction_id = request_body.get("predictionid")
+        image_base64 = request_body.get("imagebase64")
+        threshold = request_body.get("threshold", 0.5)
+
+        if validator.validate(prediction_id, image_base64) is False:
+            abort(400, description="Invalid prediction ID or image data")
+
+        app.logger.info('Advanced prediction (Derm Foundation) for predictionId: %s', prediction_id)
+
+        # Get Derm Foundation service
+        derm_service = get_derm_foundation_service()
+        if derm_service is None or not derm_service.is_available():
+            abort(503, description="Derm Foundation service not initialized")
+
+        # Decode image
+        import base64
+        image_bytes = base64.b64decode(image_base64)
+
+        # Make advanced prediction
+        result = derm_service.predict(image_bytes, threshold=threshold)
+
+        if not result.get('success'):
+            abort(500, description=result.get('error', 'Advanced prediction failed'))
+
+        response_data = {
+            "predictionid": prediction_id,
+            "model_type": "derm_foundation",
+            "melanoma_probability": result.get('melanoma_probability', 0),
+            "prediction": result.get('prediction', 'Unknown'),
+            "confidence": result.get('confidence', 0),
+            "processing_time_ms": result.get('processing_time_ms', 0),
+            "disclaimer": MEDICAL_DISCLAIMER
+        }
+
+        app.logger.info('Advanced prediction complete: %s (prob=%.3f)',
+                       result.get('prediction'), result.get('melanoma_probability', 0))
+
+        return jsonify({"status": 200, "data": response_data})
+
+    except Exception as e:
+        app.logger.error('Advanced prediction error: %s\n%s', str(e), traceback.format_exc())
+        abort(500, description=f"Advanced prediction failed: {str(e)}")
+
+
+@app.route('/compare-models', methods=['POST'])
+@cross_origin()
+def compare_models():
+    """A/B comparison between Xception (baseline) and Derm Foundation (advanced).
+
+    Runs both models and returns a combined analysis with weighted confidence.
+    Premium feature.
+    """
+    if not DERM_FOUNDATION_AVAILABLE:
+        abort(503, description="Derm Foundation model not available for comparison")
+
+    try:
+        request_body = request.get_json()
+        validator = Validator()
+
+        prediction_id = request_body.get("predictionid")
+        image_base64 = request_body.get("imagebase64")
+        threshold = request_body.get("threshold", 0.5)
+
+        if validator.validate(prediction_id, image_base64) is False:
+            abort(400, description="Invalid prediction ID or image data")
+
+        app.logger.info('Model comparison for predictionId: %s', prediction_id)
+
+        import base64
+        import time as time_module
+
+        start_time = time_module.time()
+
+        # 1. Run baseline Xception prediction
+        image_processor = ImageProcessor()
+        input_image = image_processor.prepare_input_image(image_base64)
+        model_prediction = ModelPredictionService()
+        xception_result = model_prediction.predict_model(input_image)
+        xception_value = float(xception_result[0][0])
+
+        # Xception: 0 = Melanoma, 1 = NotMelanoma
+        xception_melanoma_prob = 1 - xception_value
+        xception_pred = 'Melanoma' if xception_melanoma_prob >= threshold else 'NotMelanoma'
+
+        baseline_prediction = {
+            'melanomaProbability': xception_melanoma_prob,
+            'predictionResult': xception_pred
+        }
+
+        # 2. Run Derm Foundation prediction
+        derm_service = get_derm_foundation_service()
+        if derm_service is None or not derm_service.is_available():
+            abort(503, description="Derm Foundation service not initialized")
+
+        image_bytes = base64.b64decode(image_base64)
+        comparison = derm_service.compare_with_baseline(
+            image_bytes,
+            baseline_prediction,
+            threshold=threshold
+        )
+
+        total_time = time_module.time() - start_time
+
+        if not comparison.get('success'):
+            abort(500, description=comparison.get('error', 'Comparison failed'))
+
+        response_data = {
+            "predictionid": prediction_id,
+            "baseline": comparison['baseline'],
+            "advanced": comparison['advanced'],
+            "combined": comparison['combined'],
+            "analysis": comparison['analysis'],
+            "total_processing_time_ms": int(total_time * 1000),
+            "disclaimer": MEDICAL_DISCLAIMER
+        }
+
+        app.logger.info('Model comparison complete - Baseline: %s (%.3f), Advanced: %s (%.3f), Combined: %s',
+                       comparison['baseline']['prediction'],
+                       comparison['baseline']['melanoma_probability'],
+                       comparison['advanced']['prediction'],
+                       comparison['advanced']['melanoma_probability'],
+                       comparison['combined']['prediction'])
+
+        return jsonify({"status": 200, "data": response_data})
+
+    except Exception as e:
+        app.logger.error('Comparison error: %s\n%s', str(e), traceback.format_exc())
+        abort(500, description=f"Model comparison failed: {str(e)}")
+
+
+@app.route('/model-status', methods=['GET'])
+@cross_origin()
+def model_status():
+    """Check availability of all ML models."""
+    derm_service = get_derm_foundation_service() if DERM_FOUNDATION_AVAILABLE else None
+
+    status = {
+        "xception": {
+            "available": True,
+            "model_type": "baseline"
+        },
+        "derm_foundation": {
+            "available": derm_service.is_available() if derm_service else False,
+            "model_type": "advanced",
+            "requires_premium": True
+        },
+        "abcde_analyzer": {
+            "available": ABCDE_AVAILABLE,
+            "model_type": "analysis"
+        },
+        "mole_detection": {
+            "available": DETECTION_AVAILABLE,
+            "model_type": "detection"
+        }
+    }
+
+    return jsonify({"status": 200, "data": status})
 
 
 @app.errorhandler(HTTPException)
