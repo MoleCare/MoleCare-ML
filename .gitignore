@@ -131,6 +131,20 @@ dmypy.json
 .pyre/
 
 .idea
-.github
 .vscode
 /venv
+
+# Credentials - NEVER commit these
+kaggle.json
+training-notebooks/kaggle.json
+*.pem
+*credentials*.json
+
+# Model files (large binaries)
+*.h5
+*.pb
+*.onnx
+cnn-models/
+
+# W&B
+wandb/

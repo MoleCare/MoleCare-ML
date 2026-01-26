@@ -1,0 +1,35 @@
+# MoleCare ML Infrastructure - Example Variables
+# Copy this file to terraform.tfvars and fill in the values
+
+# AWS Configuration
+aws_region  = "us-east-1"
+environment = "staging"  # staging or production
+
+# Database Configuration (Required)
+# Generate a secure password: openssl rand -base64 24
+db_password       = "CHANGE_ME_SECURE_PASSWORD"
+db_instance_class = "db.t3.micro"  # ~$15/month
+
+# Lambda Configuration
+lambda_memory_size = 6144  # 6GB for ML model (required for Xception)
+lambda_timeout     = 60    # seconds
+
+# Production Deployment (set to true when ready)
+enable_production = false
+
+# Custom Domain (Optional)
+# domain_name     = "ml-api.molecare.co.uk"
+# certificate_arn = "arn:aws:acm:us-east-1:ACCOUNT_ID:certificate/CERT_ID"
+
+# Alerting (Optional)
+# alert_email       = "alerts@molecare.co.uk"
+# slack_webhook_url = "https://hooks.slack.com/services/XXX/YYY/ZZZ"
+
+# Weights & Biases (Optional - for experiment tracking)
+# wandb_api_key = "your-wandb-api-key"
+
+# Additional Tags
+tags = {
+  Team        = "ml"
+  CostCenter  = "research"
+}

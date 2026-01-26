@@ -2,6 +2,10 @@
 tensorflow>=2.10.0,<3.0.0
 numpy>=1.21.0
 Pillow>=9.0.0
+scikit-learn>=1.0.0
+
+# Derm Foundation (Google Health AI)
+huggingface_hub>=0.20.0
 
 # Web framework
 Flask>=2.0.0,<3.0.0

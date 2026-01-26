@@ -228,3 +228,12 @@ docker login --username AWS --password-stdin \
 >docker tag ml-docker-compose:latest 417382966138.dkr.ecr.us-east-1.amazonaws.com/ml-docker-compose:latest
 docker compose push 417382966138.dkr.ecr.us-east-1.amazonaws.com/ml-docker-compose
 docker-compose push 417382966138.dkr.ecr.us-east-1.amazonaws.com/ml-docker-compose
+
+
+
+
+https://huggingface.co/google/derm-foundation 
+
+https://developers.google.com/health-ai-developer-foundations/terms
+
+

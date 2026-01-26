@@ -11,6 +11,12 @@ Usage:
     # Deploy to production
     python deployment_flow.py run --version v1.0.0 --env production
 
+    # Deploy from training (triggered automatically)
+    python deployment_flow.py run --version v1.0.0 --env staging --triggered_by_training True
+
+    # Rollback to previous version
+    python deployment_flow.py run --version v1.0.0 --env production --rollback True
+
     # AWS Step Functions
     python deployment_flow.py step-functions create
 """
@@ -56,28 +62,61 @@ class MelanomaDeploymentFlow(FlowSpec):
         default='us-east-1'
     )
 
+    triggered_by_training = Parameter(
+        'triggered_by_training',
+        help='Whether this deployment was triggered by training flow',
+        default=False
+    )
+
+    rollback = Parameter(
+        'rollback',
+        help='Perform rollback to specified version',
+        default=False
+    )
+
+    model_name = Parameter(
+        'model_name',
+        help='Model architecture name (EfficientNetB4, Xception, etc.)',
+        default='EfficientNetB4'
+    )
+
+    s3_bucket = Parameter(
+        's3_bucket',
+        help='S3 bucket for model artifacts',
+        default='molecare-ml-artifacts'
+    )
+
     @step
     def start(self):
         """Initialize the deployment."""
         import wandb
 
-        print(f"Starting deployment for model version: {self.model_version}")
+        deployment_type = "rollback" if self.rollback else "deployment"
+        trigger_source = "training" if self.triggered_by_training else "manual"
+
+        print(f"Starting {deployment_type} for model version: {self.model_version}")
         print(f"Target environment: {self.environment}")
+        print(f"Triggered by: {trigger_source}")
+        print(f"Model architecture: {self.model_name}")
 
         # Initialize W&B for deployment tracking
         self.wandb_run = wandb.init(
             project="molecare-melanoma",
-            name=f"deploy-{self.model_version}-{self.environment}",
-            job_type="deployment",
+            name=f"{deployment_type}-{self.model_version}-{self.environment}",
+            job_type=deployment_type,
             config={
                 "model_version": self.model_version,
+                "model_name": self.model_name,
                 "environment": self.environment,
                 "canary_weight": self.canary_weight,
+                "triggered_by_training": self.triggered_by_training,
+                "rollback": self.rollback,
             },
-            tags=["deployment", self.environment, self.model_version]
+            tags=[deployment_type, self.environment, self.model_version, trigger_source]
         )
 
         self.run_id = current.run_id
+        self.deployment_type = deployment_type
 
         # Set function names based on environment
         if self.environment == 'production':
@@ -88,7 +127,95 @@ class MelanomaDeploymentFlow(FlowSpec):
             self.api_gateway_stage = 'staging'
 
         print(f"Lambda function: {self.function_name}")
-        self.next(self.validate)
+
+        if self.rollback:
+            self.next(self.rollback_step)
+        else:
+            self.next(self.validate)
+
+    @step
+    def rollback_step(self):
+        """Handle rollback to a previous version."""
+        import boto3
+        import wandb
+
+        print(f"Rolling back to version: {self.model_version}")
+
+        lambda_client = boto3.client('lambda', region_name=self.aws_region)
+
+        # Determine alias based on environment
+        if self.environment == 'production':
+            alias_name = 'live'
+        else:
+            alias_name = 'staging'
+
+        try:
+            # Get current alias configuration
+            current_alias = lambda_client.get_alias(
+                FunctionName=self.function_name,
+                Name=alias_name
+            )
+            self.previous_version = current_alias['FunctionVersion']
+            print(f"Current version: {self.previous_version}")
+
+            # List all versions to find the target
+            versions = lambda_client.list_versions_by_function(
+                FunctionName=self.function_name
+            )
+
+            # Find the target version
+            target_version = None
+            for v in versions['Versions']:
+                if v.get('Description', '').endswith(self.model_version):
+                    target_version = v['Version']
+                    break
+
+            if not target_version:
+                # If version string provided, use it directly
+                target_version = self.model_version
+
+            # Update alias to point to rollback version
+            lambda_client.update_alias(
+                FunctionName=self.function_name,
+                Name=alias_name,
+                FunctionVersion=target_version,
+                RoutingConfig={'AdditionalVersionWeights': {}}
+            )
+
+            print(f"Rolled back alias '{alias_name}' to version {target_version}")
+            self.rollback_success = True
+            self.published_version = target_version
+
+            wandb.log({
+                "rollback/success": True,
+                "rollback/from_version": self.previous_version,
+                "rollback/to_version": target_version,
+            })
+
+            # Send alert
+            wandb.alert(
+                title=f"Rollback Completed - {self.environment}",
+                text=f"Rolled back {self.function_name} from version {self.previous_version} to {target_version}",
+                level=wandb.AlertLevel.WARN
+            )
+
+        except Exception as e:
+            print(f"Rollback failed: {e}")
+            self.rollback_success = False
+            self.published_version = None
+
+            wandb.log({"rollback/success": False, "rollback/error": str(e)})
+            wandb.alert(
+                title=f"Rollback Failed - {self.environment}",
+                text=f"Failed to rollback {self.function_name}: {e}",
+                level=wandb.AlertLevel.ERROR
+            )
+
+        self.deploy_success = self.rollback_success
+        self.health_check_passed = self.rollback_success
+        self.promotion_success = self.rollback_success
+        self.smoke_test_passed = self.rollback_success
+        self.next(self.end)
 
     @step
     def validate(self):
@@ -98,18 +225,39 @@ class MelanomaDeploymentFlow(FlowSpec):
 
         print(f"Validating model artifacts for version: {self.model_version}")
 
-        # Check S3 for model artifacts
+        # Check S3 for model artifacts - use path from training flow
         s3_client = boto3.client('s3', region_name=self.aws_region)
-        bucket = 'molecare-ml-models'
-        model_key = f"{self.model_version}/model.h5"
+        bucket = self.s3_bucket
+        model_key = f"models/{self.model_name}/{self.model_version}/model.h5"
 
         try:
-            s3_client.head_object(Bucket=bucket, Key=model_key)
+            response = s3_client.head_object(Bucket=bucket, Key=model_key)
             self.model_exists = True
+            self.model_size_mb = response['ContentLength'] / (1024 * 1024)
             print(f"Model found: s3://{bucket}/{model_key}")
+            print(f"Model size: {self.model_size_mb:.2f} MB")
         except Exception as e:
-            print(f"Warning: Model not found in S3 (will use embedded model): {e}")
-            self.model_exists = False
+            # Try alternative path
+            alt_model_key = f"{self.model_version}/model.h5"
+            try:
+                s3_client.head_object(Bucket=bucket, Key=alt_model_key)
+                self.model_exists = True
+                print(f"Model found at alternate path: s3://{bucket}/{alt_model_key}")
+            except:
+                print(f"Warning: Model not found in S3 (will use embedded model): {e}")
+                self.model_exists = False
+                self.model_size_mb = 0
+
+        # Check for training metrics from training flow
+        metrics_key = f"models/{self.model_name}/{self.model_version}/metrics.json"
+        try:
+            response = s3_client.get_object(Bucket=bucket, Key=metrics_key)
+            import json
+            self.training_metrics = json.loads(response['Body'].read().decode('utf-8'))
+            print(f"Training metrics found: AUC={self.training_metrics.get('auc', 'N/A')}")
+        except Exception as e:
+            print(f"Training metrics not found: {e}")
+            self.training_metrics = {}
 
         # Check ECR for Docker image
         ecr_client = boto3.client('ecr', region_name=self.aws_region)
@@ -132,6 +280,8 @@ class MelanomaDeploymentFlow(FlowSpec):
         wandb.log({
             "validation/model_exists": self.model_exists,
             "validation/image_exists": self.image_exists,
+            "validation/model_size_mb": self.model_size_mb if hasattr(self, 'model_size_mb') else 0,
+            "validation/training_auc": self.training_metrics.get('auc', 0),
         })
 
         self.next(self.build)
@@ -371,22 +521,75 @@ class MelanomaDeploymentFlow(FlowSpec):
     def end(self):
         """Finalize the deployment."""
         import wandb
+        import json
 
         success = self.deploy_success and self.health_check_passed and self.promotion_success
 
-        print(f"\nDeployment Summary:")
+        print(f"\n{'='*50}")
+        print(f"{self.deployment_type.upper()} SUMMARY")
+        print(f"{'='*50}")
         print(f"  Model Version: {self.model_version}")
+        print(f"  Model Name: {self.model_name}")
         print(f"  Environment: {self.environment}")
         print(f"  Deploy Success: {self.deploy_success}")
         print(f"  Health Check: {self.health_check_passed}")
         print(f"  Smoke Test: {self.smoke_test_passed}")
         print(f"  Promotion: {self.promotion_success}")
         print(f"  Overall: {'SUCCESS' if success else 'FAILED'}")
+        print(f"{'='*50}")
 
         # Log final summary
         wandb.run.summary["deployment_success"] = success
         wandb.run.summary["model_version"] = self.model_version
+        wandb.run.summary["model_name"] = self.model_name
         wandb.run.summary["environment"] = self.environment
+        wandb.run.summary["triggered_by_training"] = self.triggered_by_training
+
+        # Send appropriate alert
+        if success:
+            if self.environment == 'staging' and self.triggered_by_training:
+                # Notify that staging deployment succeeded from training
+                wandb.alert(
+                    title=f"Training → Staging Deployment Complete",
+                    text=f"Model {self.model_name} {self.model_version} deployed to staging.\n"
+                         f"Training metrics: AUC={self.training_metrics.get('auc', 'N/A')}\n"
+                         f"Ready for production promotion.",
+                    level=wandb.AlertLevel.INFO
+                )
+                print("\n✅ Staging deployment complete. Ready for production promotion.")
+            elif self.environment == 'production':
+                wandb.alert(
+                    title=f"Production Deployment Complete",
+                    text=f"Model {self.model_name} {self.model_version} deployed to production.\n"
+                         f"Canary weight: {self.canary_weight*100}%",
+                    level=wandb.AlertLevel.INFO
+                )
+                print(f"\n✅ Production deployment complete with {self.canary_weight*100}% canary traffic.")
+            else:
+                print(f"\n✅ Deployment to {self.environment} complete.")
+        else:
+            wandb.alert(
+                title=f"Deployment Failed - {self.environment}",
+                text=f"Model {self.model_name} {self.model_version} deployment to {self.environment} failed.\n"
+                     f"Deploy: {self.deploy_success}, Health: {self.health_check_passed}, Promote: {self.promotion_success}",
+                level=wandb.AlertLevel.ERROR
+            )
+            print(f"\n❌ Deployment to {self.environment} failed.")
+
+        # Output deployment info for CI/CD integration
+        deployment_info = {
+            "success": success,
+            "model_version": self.model_version,
+            "model_name": self.model_name,
+            "environment": self.environment,
+            "function_name": self.function_name,
+            "published_version": getattr(self, 'published_version', None),
+            "triggered_by_training": self.triggered_by_training,
+            "training_metrics": getattr(self, 'training_metrics', {}),
+        }
+
+        # Print for CI/CD parsing
+        print(f"\nDEPLOYMENT_INFO: {json.dumps(deployment_info)}")
 
         wandb.finish()
 
