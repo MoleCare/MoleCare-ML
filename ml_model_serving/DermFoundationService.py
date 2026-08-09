@@ -85,15 +85,20 @@ class DermFoundationService:
             load_time = time.time() - start_time
             logger.info(f"Derm Foundation model loaded in {load_time:.2f}s")
 
-            # Load classifier (if available)
+            # Load classifier (required for melanoma predictions — embeddings alone are not a diagnosis)
             if os.path.exists(cls._classifier_path):
                 logger.info(f"Loading classifier from {cls._classifier_path}")
                 cls._classifier = tf.keras.models.load_model(cls._classifier_path)
                 logger.info("Classifier loaded successfully")
             else:
-                logger.warning(f"Classifier not found at {cls._classifier_path}, will use embedding-only mode")
+                logger.warning(
+                    f"Classifier not found at {cls._classifier_path}. "
+                    "Advanced prediction endpoints will return model_unavailable until "
+                    "classifier.h5 and scaler.pkl are installed (see cnn-models/derm-foundation/README.md)."
+                )
+                cls._classifier = None
 
-            # Load scaler (if available)
+            # Load scaler (required with classifier)
             if os.path.exists(cls._scaler_path):
                 logger.info(f"Loading scaler from {cls._scaler_path}")
                 with open(cls._scaler_path, 'rb') as f:
@@ -101,26 +106,54 @@ class DermFoundationService:
                 logger.info("Scaler loaded successfully")
             else:
                 logger.warning(f"Scaler not found at {cls._scaler_path}")
+                cls._scaler = None
 
-            DERM_FOUNDATION_AVAILABLE = True
+            # Embedding model loaded; ready for predictions only when classifier artifacts exist
             DERM_MODEL_LOADED = True
-            logger.info("Derm Foundation service initialized successfully")
+            DERM_FOUNDATION_AVAILABLE = cls._classifier is not None and cls._scaler is not None
+            if DERM_FOUNDATION_AVAILABLE:
+                logger.info("Derm Foundation service initialized successfully (embeddings + classifier)")
+            else:
+                logger.warning(
+                    "Derm Foundation embeddings loaded but classifier artifacts missing — "
+                    "predict-advanced/compare-models will report model_unavailable"
+                )
 
         except ImportError as e:
             logger.warning(f"Derm Foundation dependencies not available: {e}")
             logger.warning("Install with: pip install huggingface_hub")
             DERM_FOUNDATION_AVAILABLE = False
+            DERM_MODEL_LOADED = False
 
         except Exception as e:
             logger.error(f"Failed to load Derm Foundation: {e}")
             logger.error("Ensure you have accepted Google's terms and have Hugging Face access")
             DERM_FOUNDATION_AVAILABLE = False
+            DERM_MODEL_LOADED = False
 
     @classmethod
     def is_available(cls) -> bool:
-        """Check if Derm Foundation service is available."""
-        return DERM_FOUNDATION_AVAILABLE and DERM_MODEL_LOADED
+        """True only when embeddings + trained classifier + scaler are ready."""
+        return (
+            DERM_FOUNDATION_AVAILABLE
+            and DERM_MODEL_LOADED
+            and cls._classifier is not None
+            and cls._scaler is not None
+        )
 
+    @classmethod
+    def unavailable_payload(cls, detail: str = None) -> dict:
+        """Stable JSON shape for 503 / soft clients when the model cannot serve predictions."""
+        return {
+            'success': False,
+            'error': detail or 'Derm Foundation model not available',
+            'code': 'model_unavailable',
+            'model_type': 'derm_foundation',
+            'hint': (
+                'Install cnn-models/derm-foundation/classifier.h5 and scaler.pkl '
+                '(see README in that folder) and set HUGGINGFACE_TOKEN.'
+            ),
+        }
     @classmethod
     def warmup(cls):
         """Warm up the model with a dummy prediction."""
@@ -212,11 +245,7 @@ class DermFoundationService:
             - embedding_available: bool
         """
         if not self.is_available():
-            return {
-                'success': False,
-                'error': 'Derm Foundation model not available',
-                'model_type': 'derm_foundation'
-            }
+            return self.unavailable_payload()
 
         start_time = time.time()
 
@@ -228,46 +257,30 @@ class DermFoundationService:
             embedding = self._get_embedding(png_bytes)
             embedding_time = time.time() - start_time
 
+            # Scale embedding and classify (artifacts guaranteed by is_available)
+            embedding_scaled = self._scaler.transform(embedding.reshape(1, -1))
+            prob = self._classifier.predict(embedding_scaled, verbose=0)[0, 0]
+
+            # Note: 0 = Melanoma, 1 = NotMelanoma in training — invert for melanoma probability
+            melanoma_prob = 1 - float(prob)
+            total_time = time.time() - start_time
+
             result = {
                 'success': True,
                 'model_type': 'derm_foundation',
                 'embedding_available': True,
-                'embedding_dim': len(embedding),
-                'processing_time_ms': int(embedding_time * 1000)
+                'embedding_dim': int(len(embedding)),
+                'melanoma_probability': float(melanoma_prob),
+                'prediction': 'Melanoma' if melanoma_prob >= threshold else 'NotMelanoma',
+                'confidence': float(max(melanoma_prob, 1 - melanoma_prob)),
+                'threshold': threshold,
+                'processing_time_ms': int(total_time * 1000),
             }
 
-            # If classifier is available, make prediction
-            if self._classifier is not None:
-                # Scale embedding if scaler is available
-                if self._scaler is not None:
-                    embedding_scaled = self._scaler.transform(embedding.reshape(1, -1))
-                else:
-                    embedding_scaled = embedding.reshape(1, -1)
-
-                # Classify
-                prob = self._classifier.predict(embedding_scaled, verbose=0)[0, 0]
-
-                # Note: 0 = Melanoma, 1 = NotMelanoma in training
-                # So we invert the probability
-                melanoma_prob = 1 - prob
-
-                total_time = time.time() - start_time
-
-                result.update({
-                    'melanoma_probability': float(melanoma_prob),
-                    'prediction': 'Melanoma' if melanoma_prob >= threshold else 'NotMelanoma',
-                    'confidence': float(max(melanoma_prob, 1 - melanoma_prob)),
-                    'threshold': threshold,
-                    'processing_time_ms': int(total_time * 1000)
-                })
-
-                logger.info(f"Derm Foundation prediction: {result['prediction']} "
-                           f"(prob={melanoma_prob:.3f}, time={total_time*1000:.0f}ms)")
-            else:
-                # Return embedding-only result
-                result['embedding'] = embedding.tolist()
-                logger.info(f"Derm Foundation embedding extracted in {embedding_time*1000:.0f}ms")
-
+            logger.info(
+                f"Derm Foundation prediction: {result['prediction']} "
+                f"(prob={melanoma_prob:.3f}, time={total_time*1000:.0f}ms)"
+            )
             return result
 
         except Exception as e:
@@ -275,7 +288,8 @@ class DermFoundationService:
             return {
                 'success': False,
                 'error': str(e),
-                'model_type': 'derm_foundation'
+                'code': 'prediction_failed',
+                'model_type': 'derm_foundation',
             }
 
     def compare_with_baseline(
@@ -299,11 +313,15 @@ class DermFoundationService:
         derm_result = self.predict(image_data, threshold)
 
         if not derm_result.get('success'):
-            return {
+            payload = {
                 'success': False,
                 'error': derm_result.get('error', 'Derm Foundation prediction failed'),
-                'baseline': baseline_prediction
+                'code': derm_result.get('code', 'model_unavailable'),
+                'baseline': baseline_prediction,
             }
+            if derm_result.get('hint'):
+                payload['hint'] = derm_result['hint']
+            return payload
 
         # Extract baseline values
         baseline_prob = baseline_prediction.get('melanomaProbability', 0)

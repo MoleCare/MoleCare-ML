@@ -615,7 +615,11 @@ def predict_advanced():
     for improved accuracy over the baseline Xception model.
     """
     if not DERM_FOUNDATION_AVAILABLE:
-        abort(503, description="Derm Foundation model not available")
+        return jsonify({
+            "status": 503,
+            "error": "Derm Foundation model not available",
+            "code": "model_unavailable",
+        }), 503
 
     try:
         request_body = request.get_json()
@@ -633,7 +637,17 @@ def predict_advanced():
         # Get Derm Foundation service
         derm_service = get_derm_foundation_service()
         if derm_service is None or not derm_service.is_available():
-            abort(503, description="Derm Foundation service not initialized")
+            payload = (
+                derm_service.unavailable_payload()
+                if derm_service is not None
+                else {
+                    "success": False,
+                    "error": "Derm Foundation service not initialized",
+                    "code": "model_unavailable",
+                    "model_type": "derm_foundation",
+                }
+            )
+            return jsonify({"status": 503, **payload}), 503
 
         # Decode image
         import base64
@@ -643,7 +657,9 @@ def predict_advanced():
         result = derm_service.predict(image_bytes, threshold=threshold)
 
         if not result.get('success'):
-            abort(500, description=result.get('error', 'Advanced prediction failed'))
+            code = result.get('code', 'prediction_failed')
+            status = 503 if code == 'model_unavailable' else 500
+            return jsonify({"status": status, **result}), status
 
         response_data = {
             "predictionid": prediction_id,
@@ -674,7 +690,11 @@ def compare_models():
     Premium feature.
     """
     if not DERM_FOUNDATION_AVAILABLE:
-        abort(503, description="Derm Foundation model not available for comparison")
+        return jsonify({
+            "status": 503,
+            "error": "Derm Foundation model not available for comparison",
+            "code": "model_unavailable",
+        }), 503
 
     try:
         request_body = request.get_json()
@@ -713,7 +733,17 @@ def compare_models():
         # 2. Run Derm Foundation prediction
         derm_service = get_derm_foundation_service()
         if derm_service is None or not derm_service.is_available():
-            abort(503, description="Derm Foundation service not initialized")
+            payload = (
+                derm_service.unavailable_payload()
+                if derm_service is not None
+                else {
+                    "success": False,
+                    "error": "Derm Foundation service not initialized",
+                    "code": "model_unavailable",
+                    "model_type": "derm_foundation",
+                }
+            )
+            return jsonify({"status": 503, "baseline": baseline_prediction, **payload}), 503
 
         image_bytes = base64.b64decode(image_base64)
         comparison = derm_service.compare_with_baseline(
@@ -725,7 +755,9 @@ def compare_models():
         total_time = time_module.time() - start_time
 
         if not comparison.get('success'):
-            abort(500, description=comparison.get('error', 'Comparison failed'))
+            code = comparison.get('code', 'comparison_failed')
+            status = 503 if code == 'model_unavailable' else 500
+            return jsonify({"status": status, **comparison}), status
 
         response_data = {
             "predictionid": prediction_id,
