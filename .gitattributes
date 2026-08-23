@@ -1,0 +1,18 @@
+# Normalise line endings on commit; check out native.
+* text=auto eol=lf
+
+# Binary — never touched by text filters or whitespace tooling.
+*.pb        binary
+*.h5        binary
+*.keras     binary
+*.tflite    binary
+*.onnx      binary
+*.ico       binary
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+variables.data-* binary
+variables.index  binary
+
+# Notebooks are JSON; keep diffs readable but do not merge them automatically.
+*.ipynb     text eol=lf -merge

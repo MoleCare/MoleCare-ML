@@ -28,7 +28,8 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# Place or download a SavedModel under ./cnn-models/xception/1/  (see Releases)
+# Fetch the trained SavedModel (~88 MB, published as a GitHub Release asset)
+scripts/fetch-model.sh
 export MODEL_PATH=./cnn-models/xception/1
 gunicorn --bind 0.0.0.0:5000 --timeout 300 wsgi
 ```
@@ -59,9 +60,9 @@ Compose (nginx + app) may be available under `deploy/` — use localhost only; d
 
 ## Training (optional)
 
-- Experiment notebooks live under `training-notebooks/`  
-- Metaflow flow: `flows/training_flow.py` (set your own S3 bucket via env/flags)  
-- Public derm datasets (e.g. Kaggle) have **their own licenses** — document provenance before redistributing weights or images  
+- Experiment notebooks live under `training-notebooks/`
+- Metaflow flow: `flows/training_flow.py` (set your own S3 bucket via env/flags)
+- Public derm datasets (e.g. Kaggle) have **their own licenses** — document provenance before redistributing weights or images
 
 Do **not** commit `kaggle.json`, AWS keys, or patient photos.
 
@@ -119,17 +120,17 @@ Contributions are welcome. **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** —
 
 ## Intended use & limitations
 
-- **Intended:** research, education, product prototyping behind MoleCare’s own clinical disclaimers  
-- **Not intended:** autonomous diagnosis, triage without a clinician, or regulatory claims  
-- Performance varies by skin type, lighting, image quality, and dataset bias — evaluate before any production use  
+- **Intended:** research, education, product prototyping behind MoleCare’s own clinical disclaimers
+- **Not intended:** autonomous diagnosis, triage without a clinician, or regulatory claims
+- Performance varies by skin type, lighting, image quality, and dataset bias — evaluate before any production use
 
 ---
 
 ## Security
 
-- Never commit PEM files, AWS keys, or `.env`  
-- Rotate any credential that ever appeared in git history  
-- Keep nested product docs / runbooks out of this repository  
+- Never commit PEM files, AWS keys, or `.env`
+- Rotate any credential that ever appeared in git history
+- Keep nested product docs / runbooks out of this repository
 
 See the MoleCare DevBox doc: `docs/OPEN_SOURCE_SANITIZE_CHECKLIST.md`.
 
@@ -137,8 +138,8 @@ See the MoleCare DevBox doc: `docs/OPEN_SOURCE_SANITIZE_CHECKLIST.md`.
 
 ## Related
 
-- [MoleCare](https://www.molecare.co.uk/)  
-- MoleCare MCP server (assistant / ops tools)  
+- [MoleCare](https://www.molecare.co.uk/)
+- MoleCare MCP server (assistant / ops tools)
 - Mobile apps on [App Store](https://apps.apple.com/us/app/molecare/id1448635328) and [Google Play](https://play.google.com/store/apps/details?id=com.mymolecare)
 
 ---
@@ -149,4 +150,3 @@ Licensed under the [Apache License 2.0](LICENSE).
 
 Third-party model and dataset licences still apply and are **not** granted by this licence — see
 [Training data and provenance](#training-data-and-provenance) below.
-

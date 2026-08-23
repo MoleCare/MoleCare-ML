@@ -23,9 +23,10 @@ Usage:
     python training_flow.py step-functions create
     python training_flow.py step-functions trigger --version v2.0.0
 """
-from metaflow import FlowSpec, step, Parameter, resources, S3, current, retry
-import os
 import json
+import os
+
+from metaflow import S3, FlowSpec, Parameter, current, resources, retry, step
 
 
 class MelanomaTrainingFlow(FlowSpec):
@@ -123,8 +124,9 @@ class MelanomaTrainingFlow(FlowSpec):
     @step
     def start(self):
         """Initialize the training run and W&B experiment."""
-        import wandb
         from datetime import datetime
+
+        import wandb
 
         print("=" * 60)
         print(f"MELANOMA TRAINING FLOW - {self.model_version}")
@@ -188,12 +190,13 @@ class MelanomaTrainingFlow(FlowSpec):
     @step
     def prepare_data(self):
         """Load and preprocess training data from S3."""
-        import wandb
-        import numpy as np
         import tempfile
         import zipfile
-        import boto3
         from pathlib import Path
+
+        import boto3
+        import numpy as np
+        import wandb
 
         print("\n" + "=" * 60)
         print("PREPARING DATA")
@@ -257,7 +260,7 @@ class MelanomaTrainingFlow(FlowSpec):
             self.not_melanoma_count = len(os.listdir(not_melanoma_path)) if os.path.exists(not_melanoma_path) else 0
             self.total_images = self.melanoma_count + self.not_melanoma_count
 
-            print(f"\nDataset loaded:")
+            print("\nDataset loaded:")
             print(f"  Melanoma: {self.melanoma_count}")
             print(f"  Not Melanoma: {self.not_melanoma_count}")
             print(f"  Total: {self.total_images}")
@@ -317,7 +320,7 @@ class MelanomaTrainingFlow(FlowSpec):
         self.val_samples = sum(len(os.listdir(os.path.join(self.data_dir, 'validation', c))) for c in ['Melanoma', 'NotMelanoma'])
         self.test_samples = sum(len(os.listdir(os.path.join(self.data_dir, 'testing', c))) for c in ['Melanoma', 'NotMelanoma'])
 
-        print(f"\nData split:")
+        print("\nData split:")
         print(f"  Training: {self.train_samples}")
         print(f"  Validation: {self.val_samples}")
         print(f"  Testing: {self.test_samples}")
@@ -333,9 +336,9 @@ class MelanomaTrainingFlow(FlowSpec):
         """Train classification head with frozen base model."""
         import tensorflow as tf
         import wandb
-        from tensorflow.keras.preprocessing.image import ImageDataGenerator
-        from tensorflow.keras import layers, regularizers, Model
+        from tensorflow.keras import Model, layers, regularizers
         from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+        from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
         print("\n" + "=" * 60)
         print("STAGE 1: TRAINING CLASSIFICATION HEAD")
@@ -511,8 +514,8 @@ class MelanomaTrainingFlow(FlowSpec):
         """Fine-tune base model layers."""
         import tensorflow as tf
         import wandb
-        from tensorflow.keras.preprocessing.image import ImageDataGenerator
         from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+        from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
         print("\n" + "=" * 60)
         print("STAGE 2: FINE-TUNING BASE MODEL")
@@ -641,9 +644,9 @@ class MelanomaTrainingFlow(FlowSpec):
     @step
     def evaluate(self):
         """Comprehensive evaluation on test set."""
+        import numpy as np
         import tensorflow as tf
         import wandb
-        import numpy as np
         from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
         print("\n" + "=" * 60)
@@ -720,7 +723,7 @@ class MelanomaTrainingFlow(FlowSpec):
             "eval/test_specificity": self.test_specificity,
         })
 
-        print(f"\nTest Results:")
+        print("\nTest Results:")
         print(f"  Accuracy: {self.test_accuracy:.4f}")
         print(f"  AUC: {self.test_auc:.4f}")
         print(f"  Sensitivity: {self.test_sensitivity:.4f}")
@@ -741,10 +744,11 @@ class MelanomaTrainingFlow(FlowSpec):
     @step
     def register(self):
         """Register model in S3 and W&B artifacts."""
+        import tempfile
+
+        import boto3
         import tensorflow as tf
         import wandb
-        import boto3
-        import tempfile
 
         print("\n" + "=" * 60)
         print("REGISTERING MODEL")

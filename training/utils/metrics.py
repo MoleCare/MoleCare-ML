@@ -12,19 +12,20 @@ missing a melanoma (false negative) is more dangerous than
 a false alarm (false positive).
 """
 
-from typing import Dict, Any, Tuple, Optional
+from typing import Any, Dict, Optional, Tuple
+
 import numpy as np
+import tensorflow as tf
 from sklearn.metrics import (
-    roc_auc_score,
-    precision_recall_curve,
-    roc_curve,
-    confusion_matrix,
     classification_report,
+    confusion_matrix,
     f1_score,
+    precision_recall_curve,
     precision_score,
     recall_score,
+    roc_auc_score,
+    roc_curve,
 )
-import tensorflow as tf
 
 
 class MedicalMetrics:

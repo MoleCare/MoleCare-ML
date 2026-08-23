@@ -14,13 +14,14 @@ Requirements:
 - Hugging Face account with access to google/derm-foundation
 """
 
-import os
-import time
 import logging
+import os
 import pickle
+import time
+from io import BytesIO
+
 import numpy as np
 import tensorflow as tf
-from io import BytesIO
 from PIL import Image
 
 logger = logging.getLogger(__name__)

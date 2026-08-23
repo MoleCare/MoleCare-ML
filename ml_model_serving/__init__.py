@@ -1,6 +1,7 @@
-from flask import Flask
-import os
 import logging
+import os
+
+from flask import Flask
 
 # Configure logging
 logging.basicConfig(

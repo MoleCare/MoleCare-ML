@@ -1,9 +1,10 @@
-import tensorflow as tf
-import numpy as np
-from io import BytesIO
 import base64
-from PIL import Image
 import logging
+from io import BytesIO
+
+import numpy as np
+import tensorflow as tf
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 

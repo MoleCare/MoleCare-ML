@@ -1,4 +1,4 @@
-https://aws.amazon.com/blogs/opensource/deploying-python-flask-microservices-to-aws-using-open-source-tools/ 
+https://aws.amazon.com/blogs/opensource/deploying-python-flask-microservices-to-aws-using-open-source-tools/
 
 # step 1
 aws ecr create-repository \
@@ -59,7 +59,7 @@ set ec2
 # 10
 docker run
 > aws ecr describe-repositories
-> aws ecr describe-images --repository-name molecare-ml-docker-app 
+> aws ecr describe-images --repository-name molecare-ml-docker-app
 
 docker login to ecr repo
 > aws ecr get-login-password --region us-east-1 | \
@@ -69,6 +69,3 @@ ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com
 > docker pull ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/molecare-ml-docker-app:latest
 >docker run -d -p 5000:5000 ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/molecare-ml-docker-app:latest
 > curl http://localhost:5000/hello/Yauhen
-
-
-

@@ -8,16 +8,17 @@ Provides callbacks for model training including:
 - W&B integration
 """
 
-from typing import List, Optional, Callable
 import os
+from typing import Callable, List, Optional
+
 import tensorflow as tf
 from tensorflow.keras.callbacks import (
+    CSVLogger,
     EarlyStopping,
+    LearningRateScheduler,
     ModelCheckpoint,
     ReduceLROnPlateau,
-    LearningRateScheduler,
     TensorBoard,
-    CSVLogger,
 )
 
 

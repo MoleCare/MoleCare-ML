@@ -8,23 +8,23 @@ Addresses key issues from original experiments:
 - Includes all tested architectures
 """
 
-from typing import Tuple, Optional, Dict, Any
+from typing import Any, Dict, Optional, Tuple
+
 import tensorflow as tf
-from tensorflow.keras import layers, regularizers, Model
+from tensorflow.keras import Model, layers, regularizers
 from tensorflow.keras.applications import (
-    Xception,
-    InceptionV3,
-    InceptionResNetV2,
-    DenseNet201,
-    DenseNet169,
     VGG16,
-    ResNet50V2,
+    DenseNet169,
+    DenseNet201,
     EfficientNetB3,
     EfficientNetB4,
-    EfficientNetV2S,
     EfficientNetV2M,
+    EfficientNetV2S,
+    InceptionResNetV2,
+    InceptionV3,
+    ResNet50V2,
+    Xception,
 )
-
 
 # Supported models with their default input shapes
 SUPPORTED_MODELS = {

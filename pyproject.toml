@@ -1,0 +1,35 @@
+# Ruff baseline for MoleCare-ML.
+#
+# This codebase predates linting, so the rule set is deliberately conservative:
+# real errors and import hygiene are enforced, stylistic rules are not. The
+# intent is a gate that stays green on every PR, not a one-off reformat of
+# working inference code. Tighten `select` incrementally.
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = [
+    "training-notebooks",  # published research artifacts; outputs reviewed separately
+    "cnn-models",
+    "molecare-docs",
+]
+
+[tool.ruff.lint]
+# E4/E7/E9 = import, statement and syntax errors. F = pyflakes. I = import order.
+select = ["E4", "E7", "E9", "F", "I"]
+
+ignore = [
+    "F401",  # unused imports: several are optional-dependency probes and re-exports
+    "F841",  # unused locals: mostly unpacked tuples in training loops
+]
+
+# Pre-existing violations are grandfathered per-file rather than disabled
+# repo-wide, so the rule still catches them in NEW code. Worth clearing:
+# the bare `except:` blocks also swallow KeyboardInterrupt and SystemExit.
+[tool.ruff.lint.per-file-ignores]
+"doc/*" = ["E402", "F821"]                        # doc snippets, not importable modules
+"tests/*" = ["E402"]
+"flows/deployment_flow.py" = ["E722"]             # 2 bare excepts around AWS calls
+"ml_model_serving/EvolutionAnalysisService.py" = ["E722"]
+"ml_model_serving/MoleDetectionService.py" = ["E741"]   # `l` = LAB lightness channel
+"ml_model_serving/__init__.py" = ["E402"]         # late imports avoid a circular import

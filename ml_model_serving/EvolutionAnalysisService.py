@@ -6,11 +6,12 @@ using ABCDE criteria as reference. Provides detailed change tracking
 and risk assessment based on evolution patterns.
 """
 
-import numpy as np
-from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any
-from datetime import datetime
 import logging
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -437,7 +438,7 @@ class EvolutionAnalysisService:
         elif change > 0:
             return f"Overall risk score has increased while remaining at {current_risk} level."
         else:
-            return f"Overall risk score has slightly improved."
+            return "Overall risk score has slightly improved."
 
     def _calculate_evolution_score(self, changes: List[EvolutionChange]) -> float:
         """Calculate overall evolution score (0-1)."""

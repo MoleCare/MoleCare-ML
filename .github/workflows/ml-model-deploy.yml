@@ -154,6 +154,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Fetch model weights
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/fetch-model.sh
+
       - name: Build and push Docker image
         id: build-image
         env:
@@ -503,6 +508,11 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - name: Fetch model weights
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/fetch-model.sh
 
       - name: Build and push Docker image
         id: build-image

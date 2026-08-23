@@ -11,14 +11,15 @@ Features:
 4. Risk stratification and recommendations
 """
 
-import numpy as np
-import cv2
 import base64
-from typing import Dict, Any, Optional, List
-from dataclasses import dataclass, asdict
-from datetime import datetime
 import logging
+from dataclasses import asdict, dataclass
+from datetime import datetime
 from io import BytesIO
+from typing import Any, Dict, List, Optional
+
+import cv2
+import numpy as np
 from PIL import Image
 
 from .ABCDEAnalyzer import ABCDEAnalyzer, ABCDEScore, analyze_mole_comparison

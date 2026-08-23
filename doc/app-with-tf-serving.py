@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS, cross_origin
-import tensorflow as tf
-import os
-import numpy as np
-from io import BytesIO
 import base64
+import os
+from io import BytesIO
+
+import numpy as np
+import tensorflow as tf
+from flask import Flask, jsonify, request
+from flask_cors import CORS, cross_origin
 from PIL import Image
 
 app = Flask(__name__)

@@ -9,10 +9,11 @@ Addresses key issues from original experiments:
 """
 
 import os
-from typing import Tuple, Optional, Dict, Any
+from typing import Any, Dict, Optional, Tuple
+
+import numpy as np
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-import numpy as np
 
 
 class DataLoader:

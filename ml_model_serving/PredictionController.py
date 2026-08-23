@@ -1,11 +1,12 @@
-from ml_model_serving import app
-
-from flask import request, jsonify, json, abort
-from werkzeug.exceptions import HTTPException
-from flask_cors import CORS, cross_origin
-import os
 import logging
+import os
 import traceback
+
+from flask import abort, json, jsonify, request
+from flask_cors import CORS, cross_origin
+from werkzeug.exceptions import HTTPException
+
+from ml_model_serving import app
 from ml_model_serving.ImageProcessor import ImageProcessor
 from ml_model_serving.ModelPredictionService import ModelPredictionService
 from ml_model_serving.Validator import Validator
@@ -21,8 +22,8 @@ except ImportError as e:
 
 # Import mole detection and evolution modules
 try:
-    from ml_model_serving.MoleDetectionService import MoleDetectionService
     from ml_model_serving.EvolutionAnalysisService import EvolutionAnalysisService
+    from ml_model_serving.MoleDetectionService import MoleDetectionService
     DETECTION_AVAILABLE = True
 except ImportError as e:
     logging.warning(f"Detection modules not available: {e}")
@@ -249,6 +250,7 @@ def analyze_abcde_only():
 
         # Decode image
         import base64
+
         import cv2
         import numpy as np
 

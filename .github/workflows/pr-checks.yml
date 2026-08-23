@@ -28,10 +28,21 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0        # gitleaks needs history to scan the full diff
+      # Uses the gitleaks CLI, not gitleaks-action. The action requires a paid
+      # licence for repositories owned by an organisation ("[MoleCare] is an
+      # organization. License key is required."), which fails every PR. The CLI
+      # is MIT-licensed and free, and `detect` still scans the full git history
+      # -- which is the point, given this repo once carried a key in history.
       - name: Scan for committed secrets
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_VERSION: 8.30.1
+        run: |
+          set -euo pipefail
+          curl -sSfL \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar -xz -C /usr/local/bin gitleaks
+          gitleaks version
+          gitleaks detect --source . --redact --verbose --exit-code 1
 
   no-sensitive-data:
     name: Sensitive data check

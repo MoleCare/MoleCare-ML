@@ -22,12 +22,13 @@ Usage:
     python canary_deploy.py status
 """
 import argparse
-import boto3
 import json
-import time
-import wandb
-from typing import Optional, Dict, Any
 import logging
+import time
+from typing import Any, Dict, Optional
+
+import boto3
+import wandb
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

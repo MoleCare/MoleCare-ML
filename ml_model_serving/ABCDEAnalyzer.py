@@ -12,12 +12,13 @@ This module provides both traditional computer vision analysis
 and ML-based analysis for comprehensive mole assessment.
 """
 
-import numpy as np
-import cv2
-from typing import Dict, Any, Tuple, List, Optional
+import logging
 from dataclasses import dataclass
 from enum import Enum
-import logging
+from typing import Any, Dict, List, Optional, Tuple
+
+import cv2
+import numpy as np
 
 logger = logging.getLogger(__name__)
 

@@ -20,8 +20,9 @@ Usage:
     # AWS Step Functions
     python deployment_flow.py step-functions create
 """
-from metaflow import FlowSpec, step, Parameter, current
 import os
+
+from metaflow import FlowSpec, Parameter, current, step
 
 
 class MelanomaDeploymentFlow(FlowSpec):
@@ -307,9 +308,10 @@ class MelanomaDeploymentFlow(FlowSpec):
     @step
     def deploy(self):
         """Deploy to Lambda function."""
+        import time
+
         import boto3
         import wandb
-        import time
 
         print(f"Deploying to Lambda function: {self.function_name}")
 
@@ -360,10 +362,11 @@ class MelanomaDeploymentFlow(FlowSpec):
     @step
     def verify(self):
         """Run health checks and smoke tests."""
-        import boto3
-        import json
-        import wandb
         import base64
+        import json
+
+        import boto3
+        import wandb
 
         print("Running verification tests...")
 
@@ -429,7 +432,7 @@ class MelanomaDeploymentFlow(FlowSpec):
         import boto3
         import wandb
 
-        print(f"Promoting deployment to alias...")
+        print("Promoting deployment to alias...")
 
         if not self.deploy_success or not self.health_check_passed:
             print("Deployment or verification failed, skipping promotion")
@@ -520,8 +523,9 @@ class MelanomaDeploymentFlow(FlowSpec):
     @step
     def end(self):
         """Finalize the deployment."""
-        import wandb
         import json
+
+        import wandb
 
         success = self.deploy_success and self.health_check_passed and self.promotion_success
 
@@ -550,7 +554,7 @@ class MelanomaDeploymentFlow(FlowSpec):
             if self.environment == 'staging' and self.triggered_by_training:
                 # Notify that staging deployment succeeded from training
                 wandb.alert(
-                    title=f"Training → Staging Deployment Complete",
+                    title="Training → Staging Deployment Complete",
                     text=f"Model {self.model_name} {self.model_version} deployed to staging.\n"
                          f"Training metrics: AUC={self.training_metrics.get('auc', 'N/A')}\n"
                          f"Ready for production promotion.",
@@ -559,7 +563,7 @@ class MelanomaDeploymentFlow(FlowSpec):
                 print("\n✅ Staging deployment complete. Ready for production promotion.")
             elif self.environment == 'production':
                 wandb.alert(
-                    title=f"Production Deployment Complete",
+                    title="Production Deployment Complete",
                     text=f"Model {self.model_name} {self.model_version} deployed to production.\n"
                          f"Canary weight: {self.canary_weight*100}%",
                     level=wandb.AlertLevel.INFO

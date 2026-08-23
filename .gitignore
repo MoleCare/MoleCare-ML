@@ -1,23 +1,58 @@
 # credentials — never commit
 *.pem
 *.key
+*.p12
+**/kaggle.json
 **/service-account*.json
-kaggle.json
+**/credentials*.json
+credentials/
 .env
 .env.*
-credentials.json
+!.env.example
+
+# patient data — never commit
+data/patient*/
+**/patient-photos/
+*.dcm
+
+# model weights — ship via GitHub Releases, not the git tree
+cnn-models/
+*.h5
+*.keras
+*.tflite
+*.pb
+*.onnx
 
 # python
 __pycache__/
 *.py[cod]
+*.so
 .venv/
 venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
 .ipynb_checkpoints/
+
+# test / type artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.mypy_cache/
+.tox/
 
 # ml
 wandb/
 mlruns/
-*.h5.tmp
 
-# os
+# internal
+molecare-docs/
+
+# ide / os
+.idea/
+.vscode/
 .DS_Store

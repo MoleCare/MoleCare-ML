@@ -4,11 +4,11 @@ AWS Lambda handler for melanoma prediction.
 This handler is designed to work with Lambda Container images.
 It initializes the model once (singleton) and handles prediction requests.
 """
+import base64
 import json
 import logging
-import base64
-import time
 import os
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -25,8 +25,8 @@ def _initialize():
 
     if model_service is None:
         logger.info("Initializing model service...")
-        from ml_model_serving.ModelPredictionService import ModelPredictionService
         from ml_model_serving.ImageProcessor import ImageProcessor
+        from ml_model_serving.ModelPredictionService import ModelPredictionService
 
         model_service = ModelPredictionService()
         image_processor = ImageProcessor()

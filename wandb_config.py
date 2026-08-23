@@ -20,12 +20,12 @@ Usage:
     init_wandb("inference-monitoring", job_type="inference")
     log_inference(prediction="melanoma", confidence=0.92, latency_ms=150)
 """
-import wandb
 import os
 import time
-from typing import Dict, Any, Optional, List
 from functools import wraps
+from typing import Any, Dict, List, Optional
 
+import wandb
 
 # Project configuration
 WANDB_PROJECT = "molecare-melanoma"

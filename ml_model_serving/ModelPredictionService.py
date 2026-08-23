@@ -1,7 +1,8 @@
-import tensorflow as tf
-import os
 import logging
+import os
 import time
+
+import tensorflow as tf
 
 logger = logging.getLogger(__name__)
 

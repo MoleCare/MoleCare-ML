@@ -1,28 +1,28 @@
 version: '3'
 
-services: 
+services:
   tensorflow-serving:
-    build: 
+    build:
       context: ..
       dockerfile: Dockerfile.serving
     command:
       - '--model_config_file=/models/models.conf'
-    expose: 
+    expose:
       - 8501
-    depends_on: 
+    depends_on:
       - web
-      
+
   web:
     build:
       context: ..
       dockerfile: Dockerfile.web
-    volumes: 
+    volumes:
       - sql_data:/app/database
     command: gunicorn --bind 0.0.0.0:5000 wsgi
     expose:
       - 5000
   nginx:
-    build: 
+    build:
       context: ..
       dockerfile: Dockerfile.nginx
     ports:
