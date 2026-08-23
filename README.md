@@ -23,10 +23,12 @@ Optional: Google [Derm Foundation](https://huggingface.co/google/derm-foundation
 
 ## Quick start (local)
 
+Requires **Python 3.12+**.
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt   # or requirements.lock for the exact pinned set
 
 # Fetch the trained SavedModel (~88 MB, published as a GitHub Release asset)
 scripts/fetch-model.sh

@@ -60,7 +60,7 @@ env:
   AWS_REGION: eu-west-2
   ECR_REPOSITORY: molecare-ml
   S3_BUCKET: molecare-ml-artifacts-staging
-  PYTHON_VERSION: '3.9'
+  PYTHON_VERSION: '3.12'
 
 jobs:
   # Validate inputs and prepare environment
@@ -137,8 +137,8 @@ jobs:
         run: |
           cd MoleCare-ML
           pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install metaflow wandb kaggle
+          pip install -r requirements.lock
+          pip install kaggle
 
       - name: Configure Metaflow for AWS
         run: |

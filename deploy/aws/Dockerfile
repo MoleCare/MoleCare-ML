@@ -1,4 +1,4 @@
-FROM python:3.7.3-slim
+FROM python:3.12-slim
 
 # Maintainer info
 LABEL maintainer="info@molecare.co.uk"
@@ -8,7 +8,7 @@ RUN mkdir -p /molecare-ml-api
 WORKDIR ./molecare-ml-api
 
 # Copy application dependencies to the created working directory
-COPY Pipfile Pipfile.lock bootstrap-heroku.sh app.py main.py heroku.yml Procfile ./
+COPY requirements.lock bootstrap-heroku.sh app.py main.py heroku.yml Procfile ./
 # Copy every file in the source folder to the created working directory
 #COPY . .
 
@@ -16,8 +16,8 @@ COPY Pipfile Pipfile.lock bootstrap-heroku.sh app.py main.py heroku.yml Procfile
 RUN apt-get update && apt-get install -y --no-install-recommends apt-utils \
     && apt-get -y install curl \
     && apt-get install libgomp1
-RUN pip install --no-cache-dir pipenv
-RUN pipenv install --system --deploy --ignore-pipfile
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -r requirements.lock
 
 # Start app
 #localhost

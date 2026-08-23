@@ -75,6 +75,8 @@ sensitivity matters more, because a missed melanoma is the harmful error. See
 
 ## Getting set up
 
+Requires **Python 3.12+**.
+
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
