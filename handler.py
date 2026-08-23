@@ -56,7 +56,8 @@ def predict(event, context):
         "body": {
             "status": 200,
             "data": {
-                "percent": float,
+                "melanomaProbability": float,   # P(melanoma), 0-1
+                "percent": float,                # DEPRECATED: P(NOT melanoma), 0-100
                 "predictionid": "uuid-string"
             }
         }
@@ -84,19 +85,28 @@ def predict(event, context):
         input_image = image_processor.prepare_input_image(image_base64)
         prediction_res = model_service.predict_model(input_image)
 
-        prediction_value = float(prediction_res[0][0])
-        prediction_percent = prediction_value * 100
+        from ml_model_serving.model_prediction_service import (
+            melanoma_probability,
+            not_melanoma_percent,
+        )
+
+        raw_score = prediction_res[0][0]
+        # P(melanoma) -- same polarity as every other endpoint.
+        melanoma_prob = melanoma_probability(raw_score)
+        # DEPRECATED: P(NotMelanoma) as 0-100, so HIGH means LOW risk.
+        prediction_percent = not_melanoma_percent(raw_score)
 
         # Calculate metrics
         inference_time = (time.time() - start_time) * 1000  # ms
 
         response_data = {
+            "melanomaProbability": melanoma_prob,
             "percent": prediction_percent,
             "predictionid": prediction_id,
             "inference_time_ms": round(inference_time, 2)
         }
 
-        logger.info(f"Prediction complete: {prediction_id}, percent={prediction_percent:.2f}, time={inference_time:.2f}ms")
+        logger.info(f"Prediction complete: {prediction_id}, melanoma_prob={melanoma_prob:.4f}, time={inference_time:.2f}ms")
 
         return {
             "statusCode": 200,

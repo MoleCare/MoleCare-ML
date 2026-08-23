@@ -3,12 +3,16 @@ import os
 import traceback
 
 from flask import abort, json, jsonify, request
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 
 from ml_model_serving import app
 from ml_model_serving.image_processor import ImageProcessor
-from ml_model_serving.model_prediction_service import ModelPredictionService
+from ml_model_serving.model_prediction_service import (
+    ModelPredictionService,
+    melanoma_probability,
+    not_melanoma_percent,
+)
 from ml_model_serving.validator import Validator
 
 # Import ABCDE analysis modules
@@ -53,6 +57,8 @@ ALLOWED_ORIGINS = [
     if o.strip()
 ]
 CORS(app, origins=ALLOWED_ORIGINS)
+# Do NOT add a bare @cross_origin() to routes: it defaults to origins='*'
+# and silently overrides this allowlist. See tests/test_cors.py.
 logging.info("CORS allowed origins: %s", ALLOWED_ORIGINS)
 
 # Reject oversized request bodies before they are buffered and decoded.
@@ -114,13 +120,11 @@ MEDICAL_DISCLAIMER = (
 
 
 @app.route('/')
-@cross_origin()
 def index():
     return "Working"
 
 
 @app.route('/health', methods=['GET'])
-@cross_origin()
 def health_check():
     """Comprehensive health check for all ML services."""
     import time as time_module
@@ -135,8 +139,13 @@ def health_check():
     try:
         model = ModelPredictionService()
         health['services']['xception'] = {'status': 'up', 'type': 'baseline'}
+    except HTTPException:
+        raise  # abort() must not be swallowed into a 500
     except Exception as e:
-        health['services']['xception'] = {'status': 'down', 'error': str(e)}
+        # Logged, not returned: exception text can carry MODEL_PATH and the
+        # filesystem layout, and /health is unauthenticated.
+        app.logger.error('xception health check failed: %s', e)
+        health['services']['xception'] = {'status': 'down'}
         health['status'] = 'degraded'
 
     # Check ABCDE analyzer
@@ -167,10 +176,12 @@ def health_check():
                     'type': 'advanced',
                     'premium': True
                 }
+        except HTTPException:
+            raise  # abort() must not be swallowed into a 500
         except Exception as e:
+            app.logger.error('derm_foundation health check failed: %s', e)
             health['services']['derm_foundation'] = {
                 'status': 'down',
-                'error': str(e),
                 'premium': True
             }
     else:
@@ -192,7 +203,6 @@ def health_check():
 
 
 @app.route('/predict', methods=['POST'])
-@cross_origin()
 def predict():
     # silent=True so a malformed or non-JSON body yields None rather than
     # raising, letting us answer 400 instead of 500.
@@ -212,15 +222,27 @@ def predict():
     app.logger.info('predictionId: %s', prediction_id)
 
     image_processor = ImageProcessor()
-    input_image = image_processor.prepare_input_image(image_base64)
+    # prepare_input_image raises ValueError for invalid base64, an oversized
+    # payload, or an unsupported format -- all client errors. Previously the
+    # ValueError escaped as a 500, which also inflated the CloudWatch error rate
+    # that canary_deploy.py reads to decide promote-or-rollback.
+    try:
+        input_image = image_processor.prepare_input_image(image_base64)
+    except ValueError as e:
+        abort(400, description=str(e))
+
     model_prediction = ModelPredictionService()
     prediction_res = model_prediction.predict_model(input_image)
     app.logger.info('prediction: %s', prediction_res)
-    prediction_value = prediction_res[0][0]
-    prediction_percent = prediction_value * 100
+    raw_score = prediction_res[0][0]
 
     response_body = {}
-    response_body["percent"] = prediction_percent
+    # Preferred field: P(melanoma), the same polarity as every other endpoint.
+    response_body["melanomaProbability"] = melanoma_probability(raw_score)
+    # DEPRECATED. P(NotMelanoma) as 0-100, so a HIGH value means LOW risk.
+    # Retained only because molecare-server persists it; migrate that consumer
+    # to melanomaProbability, then remove this field.
+    response_body["percent"] = not_melanoma_percent(raw_score)
     response_body["predictionid"] = prediction_id
     # Every prediction leaves with a disclaimer. The other analysis endpoints
     # already do this; /predict did not, despite being the primary route.
@@ -230,7 +252,6 @@ def predict():
 
 
 @app.route('/analyze', methods=['POST'])
-@cross_origin()
 def analyze():
     """Combined ML prediction + ABCDE analysis endpoint."""
     if not ABCDE_AVAILABLE:
@@ -264,13 +285,14 @@ def analyze():
 
         return jsonify({"status": 200, "data": response_data})
 
+    except HTTPException:
+        raise  # abort() must not be swallowed into a 500
     except Exception as e:
         app.logger.error('Analysis error: %s\n%s', str(e), traceback.format_exc())
-        abort(500, description=f"Analysis failed: {str(e)}")
+        abort(500, description="Analysis failed.")
 
 
 @app.route('/analyze/abcde', methods=['POST'])
-@cross_origin()
 def analyze_abcde_only():
     """ABCDE-only analysis endpoint (without ML prediction)."""
     if not ABCDE_AVAILABLE:
@@ -316,13 +338,14 @@ def analyze_abcde_only():
 
         return jsonify({"status": 200, "data": response_data})
 
+    except HTTPException:
+        raise  # abort() must not be swallowed into a 500
     except Exception as e:
         app.logger.error('ABCDE analysis error: %s\n%s', str(e), traceback.format_exc())
-        abort(500, description=f"ABCDE analysis failed: {str(e)}")
+        abort(500, description="ABCDE analysis failed.")
 
 
 @app.route('/compare', methods=['POST'])
-@cross_origin()
 def compare_moles():
     """Compare two mole images for evolution tracking."""
     if not ABCDE_AVAILABLE:
@@ -365,13 +388,14 @@ def compare_moles():
 
         return jsonify({"status": 200, "data": response_data})
 
+    except HTTPException:
+        raise  # abort() must not be swallowed into a 500
     except Exception as e:
         app.logger.error('Comparison error: %s\n%s', str(e), traceback.format_exc())
-        abort(500, description=f"Comparison failed: {str(e)}")
+        abort(500, description="Comparison failed.")
 
 
 @app.route('/detect', methods=['POST'])
-@cross_origin()
 def detect_moles():
     """Detect moles in an image and return bounding boxes with metadata."""
     if not DETECTION_AVAILABLE:
@@ -440,13 +464,14 @@ def detect_moles():
 
         return jsonify({"status": 200, "data": response_data})
 
+    except HTTPException:
+        raise  # abort() must not be swallowed into a 500
     except Exception as e:
         app.logger.error('Detection error: %s\n%s', str(e), traceback.format_exc())
-        abort(500, description=f"Detection failed: {str(e)}")
+        abort(500, description="Detection failed.")
 
 
 @app.route('/detect/extract', methods=['POST'])
-@cross_origin()
 def extract_mole():
     """Extract and enhance a specific mole from an image."""
     if not DETECTION_AVAILABLE:
@@ -505,13 +530,14 @@ def extract_mole():
 
         return jsonify({"status": 200, "data": response_data})
 
+    except HTTPException:
+        raise  # abort() must not be swallowed into a 500
     except Exception as e:
         app.logger.error('Extraction error: %s\n%s', str(e), traceback.format_exc())
-        abort(500, description=f"Extraction failed: {str(e)}")
+        abort(500, description="Extraction failed.")
 
 
 @app.route('/evolution', methods=['POST'])
-@cross_origin()
 def analyze_evolution():
     """Analyze evolution of a mole across multiple timestamped images."""
     if not DETECTION_AVAILABLE:
@@ -596,13 +622,14 @@ def analyze_evolution():
 
         return jsonify({"status": 200, "data": response_data})
 
+    except HTTPException:
+        raise  # abort() must not be swallowed into a 500
     except Exception as e:
         app.logger.error('Evolution analysis error: %s\n%s', str(e), traceback.format_exc())
-        abort(500, description=f"Evolution analysis failed: {str(e)}")
+        abort(500, description="Evolution analysis failed.")
 
 
 @app.route('/validate', methods=['POST'])
-@cross_origin()
 def validate_image():
     """Validate image quality for mole analysis."""
     try:
@@ -642,13 +669,14 @@ def validate_image():
 
         return jsonify({"status": 200, "data": response_data})
 
+    except HTTPException:
+        raise  # abort() must not be swallowed into a 500
     except Exception as e:
         app.logger.error('Validation error: %s\n%s', str(e), traceback.format_exc())
-        abort(500, description=f"Validation failed: {str(e)}")
+        abort(500, description="Validation failed.")
 
 
 @app.route('/predict-advanced', methods=['POST'])
-@cross_origin()
 def predict_advanced():
     """Advanced melanoma prediction using Google Derm Foundation model.
 
@@ -717,13 +745,14 @@ def predict_advanced():
 
         return jsonify({"status": 200, "data": response_data})
 
+    except HTTPException:
+        raise  # abort() must not be swallowed into a 500
     except Exception as e:
         app.logger.error('Advanced prediction error: %s\n%s', str(e), traceback.format_exc())
-        abort(500, description=f"Advanced prediction failed: {str(e)}")
+        abort(500, description="Advanced prediction failed.")
 
 
 @app.route('/compare-models', methods=['POST'])
-@cross_origin()
 def compare_models():
     """A/B comparison between Xception (baseline) and Derm Foundation (advanced).
 
@@ -760,10 +789,7 @@ def compare_models():
         input_image = image_processor.prepare_input_image(image_base64)
         model_prediction = ModelPredictionService()
         xception_result = model_prediction.predict_model(input_image)
-        xception_value = float(xception_result[0][0])
-
-        # Xception: 0 = Melanoma, 1 = NotMelanoma
-        xception_melanoma_prob = 1 - xception_value
+        xception_melanoma_prob = melanoma_probability(xception_result[0][0])
         xception_pred = 'Melanoma' if xception_melanoma_prob >= threshold else 'NotMelanoma'
 
         baseline_prediction = {
@@ -819,13 +845,14 @@ def compare_models():
 
         return jsonify({"status": 200, "data": response_data})
 
+    except HTTPException:
+        raise  # abort() must not be swallowed into a 500
     except Exception as e:
         app.logger.error('Comparison error: %s\n%s', str(e), traceback.format_exc())
-        abort(500, description=f"Model comparison failed: {str(e)}")
+        abort(500, description="Model comparison failed.")
 
 
 @app.route('/model-status', methods=['GET'])
-@cross_origin()
 def model_status():
     """Check availability of all ML models."""
     derm_service = get_derm_foundation_service() if DERM_FOUNDATION_AVAILABLE else None

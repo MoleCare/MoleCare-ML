@@ -92,12 +92,18 @@ Do **not** commit `kaggle.json`, AWS keys, or patient photos.
 # Health
 curl -s http://localhost:5000/health
 
-# Predict (multipart image) — shape depends on your deployed handlers
+# Predict — JSON body, base64 image (NOT multipart)
 curl -s -X POST http://localhost:5000/predict \
-  -F "file=@sample.jpg"
+  -H 'Content-Type: application/json' \
+  -d "{\"predictionid\":\"$(uuidgen)\",\"imagebase64\":\"$(base64 < sample.jpg | tr -d '\n')\"}"
 ```
 
-See `ml_model_serving/` for route definitions and response schemas. Responses should include a non-diagnostic disclaimer.
+`/predict` returns `melanomaProbability` (P(melanoma), 0-1). It also returns a deprecated
+`percent` field which is P(**not** melanoma) as 0-100 — a high `percent` means low risk. Use
+`melanomaProbability`.
+
+See `ml_model_serving/` for route definitions and response schemas. Responses include a
+non-diagnostic disclaimer.
 
 ---
 

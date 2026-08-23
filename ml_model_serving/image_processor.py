@@ -22,6 +22,21 @@ class ImageQualityReport:
         self.resolution_ok = True
         self.framing_ok = True
         self.quality_score = 1.0  # 0-1 score
+        # Reported by /validate. These were read by the endpoint but never
+        # defined here, so every call raised AttributeError and returned 500.
+        self.aspect_ratio = 0.0
+        self.file_size_kb = 0.0
+        self.is_optimal_resolution = False
+
+    @property
+    def format_detected(self):
+        """Alias used by the /validate response schema."""
+        return self.format
+
+    @property
+    def meets_minimum_resolution(self):
+        """Alias used by the /validate response schema."""
+        return self.resolution_ok
 
     def to_dict(self):
         return {
@@ -156,6 +171,7 @@ class ImageProcessor:
 
         # Validate file size
         size_mb = len(image_bytes) / (1024 * 1024)
+        report.file_size_kb = round(len(image_bytes) / 1024, 2)
         if size_mb > self.MAX_IMAGE_SIZE_MB:
             report.is_valid = False
             report.errors.append(f"Image too large: {size_mb:.2f}MB (max {self.MAX_IMAGE_SIZE_MB}MB)")
@@ -200,6 +216,7 @@ class ImageProcessor:
 
         # Check aspect ratio (should be close to square for centered mole)
         aspect_ratio = max_dimension / min_dimension if min_dimension > 0 else 0
+        report.aspect_ratio = round(aspect_ratio, 3)
         if aspect_ratio > 2.0:
             report.warnings.append(
                 f"Image is not square (aspect ratio: {aspect_ratio:.2f}). "
@@ -209,6 +226,7 @@ class ImageProcessor:
 
         # Optimal resolution bonus
         if min_dimension >= self.OPTIMAL_RESOLUTION:
+            report.is_optimal_resolution = True
             report.quality_score = min(1.0, report.quality_score + 0.1)
 
         # Ensure quality score is in valid range

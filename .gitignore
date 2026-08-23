@@ -56,3 +56,6 @@ molecare-docs/
 .idea/
 .vscode/
 .DS_Store
+
+# uv scratch lock from ad-hoc `uv run --with ...` invocations
+uv.lock
