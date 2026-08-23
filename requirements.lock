@@ -213,9 +213,13 @@ six==1.17.0
     #   python-dateutil
     #   tensorflow
 tensorflow==2.21.0
-    # via -r requirements.txt
+    # via
+    #   -r requirements.txt
+    #   tf-keras
 termcolor==3.3.0
     # via tensorflow
+tf-keras==2.21.0
+    # via -r requirements.txt
 threadpoolctl==3.6.0
     # via scikit-learn
 tqdm==4.70.0
