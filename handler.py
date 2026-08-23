@@ -25,8 +25,8 @@ def _initialize():
 
     if model_service is None:
         logger.info("Initializing model service...")
-        from ml_model_serving.ImageProcessor import ImageProcessor
-        from ml_model_serving.ModelPredictionService import ModelPredictionService
+        from ml_model_serving.image_processor import ImageProcessor
+        from ml_model_serving.model_prediction_service import ModelPredictionService
 
         model_service = ModelPredictionService()
         image_processor = ImageProcessor()

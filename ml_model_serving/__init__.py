@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 # Import controller
-import ml_model_serving.PredictionController
+import ml_model_serving.prediction_controller
 
 # Import ABCDE analysis modules
 try:
-    from ml_model_serving.ABCDEAnalyzer import ABCDEAnalyzer, ABCDEScore, analyze_mole_comparison
-    from ml_model_serving.MoleAnalysisService import MoleAnalysisService, analyze_mole_image
+    from ml_model_serving.abcde_analyzer import ABCDEAnalyzer, ABCDEScore, analyze_mole_comparison
+    from ml_model_serving.mole_analysis_service import MoleAnalysisService, analyze_mole_image
     logger.info("ABCDE analysis modules loaded")
 except ImportError as e:
     logger.warning(f"ABCDE modules not fully available: {e}")
@@ -26,7 +26,7 @@ except ImportError as e:
 # Warm up model on startup (if not in Lambda - Lambda handles this separately)
 if os.environ.get('AWS_LAMBDA_FUNCTION_NAME') is None:
     try:
-        from ml_model_serving.ModelPredictionService import ModelPredictionService
+        from ml_model_serving.model_prediction_service import ModelPredictionService
         service = ModelPredictionService()
         ModelPredictionService.warmup()
         logger.info("Model initialized and warmed up successfully")

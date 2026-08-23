@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-SERVICE_PATH = ROOT / "ml_model_serving" / "DermFoundationService.py"
+SERVICE_PATH = ROOT / "ml_model_serving" / "derm_foundation_service.py"
 
 
 def _load_service_module():
@@ -25,10 +25,10 @@ def _load_service_module():
     sys.modules.setdefault("numpy", np)
 
     spec = importlib.util.spec_from_file_location(
-        "ml_model_serving.DermFoundationService", SERVICE_PATH
+        "ml_model_serving.derm_foundation_service", SERVICE_PATH
     )
     mod = importlib.util.module_from_spec(spec)
-    sys.modules["ml_model_serving.DermFoundationService"] = mod
+    sys.modules["ml_model_serving.derm_foundation_service"] = mod
     spec.loader.exec_module(mod)
     return mod
 

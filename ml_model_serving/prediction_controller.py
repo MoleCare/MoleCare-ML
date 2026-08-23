@@ -7,14 +7,14 @@ from flask_cors import CORS, cross_origin
 from werkzeug.exceptions import HTTPException
 
 from ml_model_serving import app
-from ml_model_serving.ImageProcessor import ImageProcessor
-from ml_model_serving.ModelPredictionService import ModelPredictionService
-from ml_model_serving.Validator import Validator
+from ml_model_serving.image_processor import ImageProcessor
+from ml_model_serving.model_prediction_service import ModelPredictionService
+from ml_model_serving.validator import Validator
 
 # Import ABCDE analysis modules
 try:
-    from ml_model_serving.ABCDEAnalyzer import ABCDEAnalyzer
-    from ml_model_serving.MoleAnalysisService import MoleAnalysisService
+    from ml_model_serving.abcde_analyzer import ABCDEAnalyzer
+    from ml_model_serving.mole_analysis_service import MoleAnalysisService
     ABCDE_AVAILABLE = True
 except ImportError as e:
     logging.warning(f"ABCDE modules not available: {e}")
@@ -22,8 +22,8 @@ except ImportError as e:
 
 # Import mole detection and evolution modules
 try:
-    from ml_model_serving.EvolutionAnalysisService import EvolutionAnalysisService
-    from ml_model_serving.MoleDetectionService import MoleDetectionService
+    from ml_model_serving.evolution_analysis_service import EvolutionAnalysisService
+    from ml_model_serving.mole_detection_service import MoleDetectionService
     DETECTION_AVAILABLE = True
 except ImportError as e:
     logging.warning(f"Detection modules not available: {e}")
@@ -31,7 +31,7 @@ except ImportError as e:
 
 # Import Derm Foundation (Google Health AI) module
 try:
-    from ml_model_serving.DermFoundationService import DermFoundationService
+    from ml_model_serving.derm_foundation_service import DermFoundationService
     DERM_FOUNDATION_AVAILABLE = True
 except ImportError as e:
     logging.warning(f"Derm Foundation module not available: {e}")
