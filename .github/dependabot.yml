@@ -20,3 +20,12 @@ updates:
     schedule:
       interval: "monthly"
     labels: ["dependencies", "docker"]
+    ignore:
+      # The image installs requirements.lock, which pins tensorflow==2.21.0.
+      # TensorFlow publishes wheels for cp310-cp313 only, so a Python major or
+      # minor bump ahead of TensorFlow's support breaks the build. Revisit when
+      # TensorFlow ships wheels for the newer interpreter.
+      - dependency-name: "python"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
