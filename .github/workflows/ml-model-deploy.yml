@@ -51,6 +51,11 @@ on:
         default: 'EfficientNetB4'
         type: string
 
+# Least privilege: GITHUB_TOKEN defaults to broad write without this.
+# Jobs that need more request it explicitly.
+permissions:
+  contents: read
+
 env:
   AWS_REGION: eu-west-2
   ECR_REPOSITORY: molecare-ml
@@ -270,6 +275,8 @@ jobs:
   # Deploy Production Job (requires manual approval)
   # ============================================================
   deploy-production:
+    permissions:
+      contents: write   # creates a GitHub Release
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [build, deploy-staging]

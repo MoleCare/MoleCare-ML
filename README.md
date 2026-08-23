@@ -108,6 +108,15 @@ by contributing collection. If you intend to use the trained weights commerciall
 licence terms of the specific collections involved — a CC-BY-NC source restricts commercial
 redistribution of derived artefacts. Attribution to the ISIC Archive is expected in all cases.
 
+## Contributing
+
+Contributions are welcome. **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — in particular the
+`pre-commit install` step, which prevents credentials and notebook data from entering git history.
+
+- [MODEL_CARD.md](MODEL_CARD.md) — what the model is, what was measured, and what was not
+- [SECURITY.md](SECURITY.md) — reporting a vulnerability or a clinical-safety concern
+- [Good first issues](https://github.com/MoleCare/MoleCare-ML/labels/good%20first%20issue)
+
 ## Intended use & limitations
 
 - **Intended:** research, education, product prototyping behind MoleCare’s own clinical disclaimers  

@@ -11,7 +11,61 @@ remove or weaken the non-diagnostic disclaimers in the API responses or document
 be merged. If a change affects how a prediction is presented to an end user, say so explicitly
 in the pull request.
 
+## Before your first commit — set up the safety hooks
+
+This repository handles medical-adjacent data and has previously had credentials committed to it.
+The hooks below run **before** a commit is created, which is the only point where a mistake is
+cheap to fix. Once something is in git history, removing it means rewriting the repository.
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+That's it — the hooks now run on every `git commit`. To check the whole tree at once:
+
+```bash
+pre-commit run --all-files
+```
+
+### What the hooks stop
+
+| Hook | Catches |
+|---|---|
+| `detect-private-key` | RSA / EC / OpenSSH private keys |
+| `gitleaks` | AWS keys, service-account JSON, tokens, high-entropy strings |
+| `nbstripout` | Jupyter outputs — **the most common way data leaks out of an ML repo**, because outputs embed images and dataframes as base64 |
+| `check-added-large-files` | Anything over 5 MB — model weights belong in Releases |
+| `ruff` | Lint and formatting |
+
+`training-notebooks/` is excluded from `nbstripout` because its plots are reviewed published
+results. Any **new** notebook gets stripped.
+
+### The same checks run on your pull request
+
+CI re-runs them, so a hook you skipped locally is caught before merge. Pull request checks run
+with **no access to repository secrets** — a fork PR cannot reach our AWS or W&B credentials,
+by design. Deployment jobs are gated to pushes on `main`.
+
+If CI flags a file, do not just delete it in a new commit — it stays in history. Say so in the
+pull request and a maintainer will help rewrite the branch.
+
+## Data rules
+
+- **Never** commit patient, user, or clinical images. Only openly licensed dermoscopic data
+  (for example the ISIC Archive), with provenance documented.
+- **Never** commit credentials: no `.pem`, `.key`, service-account JSON, `kaggle.json`, `.env`.
+  CI blocks these paths outright.
+- If you add training data, record its licence in [MODEL_CARD.md](MODEL_CARD.md).
+
+## Reporting model performance
+
+State the evaluation set and the metrics. For this model, **accuracy alone is not sufficient** —
+sensitivity matters more, because a missed melanoma is the harmful error. See
+[MODEL_CARD.md](MODEL_CARD.md) for what is currently measured and what is not.
+
 ## Ways to help
+
 
 - **Model quality** — improved architectures, augmentation, or calibration, with metrics to back it
 - **Bias evaluation** — performance across Fitzpatrick skin types is the most valuable open problem here

@@ -1,0 +1,50 @@
+# Contributor safety hooks. Install once after cloning:
+#     pip install pre-commit && pre-commit install
+# Run against everything:
+#     pre-commit run --all-files
+#
+# These run BEFORE a commit is created, so a mistake never enters git history —
+# which is the only place it can be cleaned up cheaply.
+
+exclude: '^(cnn-models/|\.git/)'
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # The two that matter most for this repository
+      - id: detect-private-key          # RSA/EC/OpenSSH keys — this repo had one
+      - id: check-added-large-files     # model weights belong in Releases, not commits
+        args: ['--maxkb=5000']
+      # General hygiene
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+
+  # Strip Jupyter outputs before they reach git.
+  # Notebook outputs embed images and printed dataframes as base64 — the most
+  # common way patient data leaks out of an ML repository.
+  # training-notebooks/ is excluded: its plots are published results that have
+  # been reviewed and verified to contain no data. New notebooks get stripped.
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+      - id: nbstripout
+        exclude: '^training-notebooks/'
+
+  # Secret detection across the whole staged diff
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.2
+    hooks:
+      - id: ruff-check
+        args: ['--fix']
+      - id: ruff-format

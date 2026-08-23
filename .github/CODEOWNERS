@@ -1,0 +1,13 @@
+# Every pull request requires review from a maintainer.
+* @YauhenBichel
+
+# Anything that can move credentials, run in CI, or change model behaviour
+# needs explicit attention — these are the paths where a mistake is expensive.
+/.github/workflows/   @YauhenBichel
+/.github/CODEOWNERS   @YauhenBichel
+/.pre-commit-config.yaml @YauhenBichel
+/deploy/              @YauhenBichel
+/ml_model_serving/    @YauhenBichel
+/cnn-models/          @YauhenBichel
+/SECURITY.md          @YauhenBichel
+/MODEL_CARD.md        @YauhenBichel
