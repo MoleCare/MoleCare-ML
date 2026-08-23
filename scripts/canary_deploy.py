@@ -24,6 +24,7 @@ Usage:
 import argparse
 import json
 import logging
+import os
 import time
 from typing import Any, Dict, Optional
 
@@ -34,10 +35,19 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Configuration
-FUNCTION_NAME = "molecare-ml-prod"
+#
+# These were hardcoded to a function and a region that do not exist for this
+# project: "molecare-ml-prod" (the workflows deploy "molecare-ml-production")
+# in us-east-1 (everything lives in eu-west-2). A canary run would have looked
+# for a missing function in the wrong region and reported it as absent rather
+# than failing loudly.
+#
+# Both now default correctly and can be overridden from the environment, which
+# is how the workflows already pass AWS_REGION.
+FUNCTION_NAME = os.environ.get("LAMBDA_FUNCTION_NAME", "molecare-ml-production")
 ALIAS_NAME = "live"
 ROLLBACK_ALIAS = "rollback"
-AWS_REGION = "us-east-1"
+AWS_REGION = os.environ.get("AWS_REGION", "eu-west-2")
 
 
 class CanaryDeployer:
@@ -351,6 +361,16 @@ class CanaryDeployer:
 
 def main():
     parser = argparse.ArgumentParser(description="Canary deployment for MoleCare ML")
+    parser.add_argument(
+        "--function-name",
+        default=FUNCTION_NAME,
+        help=f"Lambda function to deploy (default: {FUNCTION_NAME})",
+    )
+    parser.add_argument(
+        "--region",
+        default=AWS_REGION,
+        help=f"AWS region (default: {AWS_REGION})",
+    )
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 
     # Start canary
@@ -377,7 +397,8 @@ def main():
 
     args = parser.parse_args()
 
-    deployer = CanaryDeployer(FUNCTION_NAME)
+    deployer = CanaryDeployer(args.function_name, region=args.region)
+    logger.info("Targeting %s in %s", args.function_name, args.region)
 
     if args.command == "start":
         result = deployer.start_canary(args.version, args.weight)

@@ -140,7 +140,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd MoleCare-ML
           pip install --upgrade pip
           pip install -r requirements.lock
           pip install kaggle
@@ -181,7 +180,6 @@ jobs:
           EPOCHS_STAGE2: ${{ needs.prepare.outputs.epochs_stage2 }}
           DEPLOY_THRESHOLD_AUC: ${{ needs.prepare.outputs.deploy_threshold_auc }}
         run: |
-          cd MoleCare-ML
 
           # Run the Metaflow training flow
           python flows/training_flow.py run \
@@ -214,8 +212,8 @@ jobs:
         with:
           name: training-logs-${{ needs.prepare.outputs.run_id }}
           path: |
-            MoleCare-ML/training_output.log
-            MoleCare-ML/wandb/
+            training_output.log
+            wandb/
           retention-days: 30
 
       - name: Log training results to W&B
