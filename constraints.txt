@@ -28,4 +28,4 @@ setuptools>=83.0.0
 soupsieve>=2.8.4
 urllib3>=2.7.0
 virtualenv>=20.36.1
-wheel>=0.38.1
+wheel>=0.48.0
