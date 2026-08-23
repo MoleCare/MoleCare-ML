@@ -85,6 +85,26 @@ jobs:
           done
           if [ "$FOUND" -eq 1 ]; then echo "Notebook outputs present - flagged for maintainer review."; else echo "No embedded notebook output images."; fi
 
+      - name: Block embedded base64 blobs
+        run: |
+          set -euo pipefail
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          FAIL=0
+          for f in $(git diff --name-only --diff-filter=AM "$BASE" "$HEAD"); do
+            [ -f "$f" ] || continue
+            case "$f" in *.ipynb|*.lock|package-lock.json|*.svg) continue;; esac
+            # A long unbroken base64 run in source is almost always an embedded
+            # binary. A patient photo reached this repository exactly this way,
+            # as a data: URI inside a .py test fixture, and passed every other
+            # check here because the filename looked ordinary.
+            if grep -qE '[A-Za-z0-9+/]{512,}={0,2}' "$f"; then
+              echo "::error file=$f::Long base64 blob detected. Do not embed binaries or images in source - generate fixtures at runtime, or attach large assets to a Release."
+              FAIL=1
+            fi
+          done
+          [ "$FAIL" -eq 0 ] && echo "No embedded base64 blobs." || exit 1
+
       - name: Block oversized files
         run: |
           set -euo pipefail
@@ -110,3 +130,53 @@ jobs:
         with:
           python-version: '3.11'
       - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          # Must match the interpreter the container targets. TensorFlow ships
+          # no wheels beyond cp313, so bumping this needs a TensorFlow bump too.
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install from the lock file
+        # The lock, not requirements.txt: it is what the images and the deploy
+        # job install, so it is what CI must exercise. tf-keras being present
+        # in requirements.txt but absent from the lock is precisely the class
+        # of drift this catches.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock
+
+      - name: Verify the lock satisfies requirements.txt
+        run: |
+          pip install uv
+          uv pip compile requirements.txt -c constraints.txt \
+            --python-version 3.12 --universal --no-header -o /tmp/expected.lock
+          if ! diff -q requirements.lock /tmp/expected.lock >/dev/null; then
+            echo "::error::requirements.lock is out of date. Regenerate it:"
+            echo "  uv pip compile requirements.txt -c constraints.txt -o requirements.lock --python-version 3.12 --universal --no-header"
+            diff requirements.lock /tmp/expected.lock | head -40
+            exit 1
+          fi
+          echo "Lock file is in sync with requirements.txt."
+
+      - name: Run tests
+        # Model-dependent tests skip cleanly when cnn-models/ is absent, so this
+        # does not need the weights downloaded.
+        run: python -m unittest discover -s tests -v
+
+  docker-build:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build the serving image
+        # Catches base-image and dependency-resolution breakage on the surface
+        # that actually ships. A python:3.14 bump reached main because nothing
+        # here built the image.
+        run: docker build -f deploy/Dockerfile.web -t molecare-ml:pr .
