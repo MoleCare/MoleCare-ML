@@ -5,6 +5,21 @@ import time
 
 import tensorflow as tf
 
+# The shipped Xception artefact under cnn-models/ is a Keras 2.9 SavedModel.
+# Keras 3 dropped SavedModel loading entirely: tf.keras.models.load_model()
+# raises "File format not supported", and neither keras.layers.TFSMLayer nor
+# tf.saved_model.load can restore it either. tf_keras is the maintained Keras 2
+# compatibility package and loads it correctly.
+#
+# If the model is ever re-exported to the Keras 3 `.keras` format, this shim can
+# go and `tf.keras` can be used directly again.
+try:
+    import tf_keras as _keras
+    _KERAS_BACKEND = "tf_keras"
+except ImportError:  # pragma: no cover - depends on the installed environment
+    _keras = tf.keras
+    _KERAS_BACKEND = "tf.keras"
+
 logger = logging.getLogger(__name__)
 
 # The model was trained with {'Melanoma': 0, 'NotMelanoma': 1}, so the raw score
@@ -51,9 +66,20 @@ class ModelPredictionService:
     def _load_model(cls):
         """Load the TensorFlow model once at startup."""
         if cls._model is None:
-            logger.info(f"Loading model from: {cls._model_path}")
+            logger.info(
+                f"Loading model from: {cls._model_path} (via {_KERAS_BACKEND})"
+            )
             start_time = time.time()
-            cls._model = tf.keras.models.load_model(cls._model_path)
+            try:
+                cls._model = _keras.models.load_model(cls._model_path)
+            except (OSError, ValueError) as exc:
+                raise RuntimeError(
+                    f"Could not load the model at {cls._model_path} using "
+                    f"{_KERAS_BACKEND}. The bundled artefact is a Keras 2.9 "
+                    "SavedModel, which Keras 3 cannot read - install tf-keras "
+                    "(it is in requirements.txt) or re-export the model to the "
+                    "Keras 3 .keras format."
+                ) from exc
             load_time = time.time() - start_time
             logger.info(f"Model loaded successfully in {load_time:.2f}s")
 

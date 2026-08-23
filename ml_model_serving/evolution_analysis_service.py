@@ -150,7 +150,7 @@ class EvolutionAnalysisService:
     def _get_abcde_analyzer(self):
         """Lazy load ABCDE analyzer."""
         if self.abcde_analyzer is None:
-            from .ABCDEAnalyzer import ABCDEAnalyzer
+            from .abcde_analyzer import ABCDEAnalyzer
             self.abcde_analyzer = ABCDEAnalyzer()
         return self.abcde_analyzer
 
@@ -164,7 +164,7 @@ class EvolutionAnalysisService:
     def _get_image_processor(self):
         """Lazy load image processor."""
         if self.image_processor is None:
-            from .ImageProcessor import ImageProcessor
+            from .image_processor import ImageProcessor
             self.image_processor = ImageProcessor()
         return self.image_processor
 

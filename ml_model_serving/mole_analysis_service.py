@@ -22,7 +22,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from .ABCDEAnalyzer import ABCDEAnalyzer, ABCDEScore, analyze_mole_comparison
+from .abcde_analyzer import ABCDEAnalyzer, ABCDEScore, analyze_mole_comparison
 
 logger = logging.getLogger(__name__)
 

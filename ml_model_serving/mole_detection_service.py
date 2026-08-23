@@ -84,7 +84,7 @@ class MoleDetectionService:
     def _get_image_processor(self):
         """Lazy load image processor."""
         if self.image_processor is None:
-            from .ImageProcessor import ImageProcessor
+            from .image_processor import ImageProcessor
             self.image_processor = ImageProcessor()
         return self.image_processor
 
