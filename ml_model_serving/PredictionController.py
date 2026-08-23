@@ -37,8 +37,37 @@ except ImportError as e:
     logging.warning(f"Derm Foundation module not available: {e}")
     DERM_FOUNDATION_AVAILABLE = False
 
-# cross domain requests
-CORS(app)
+# Cross-origin requests.
+#
+# CORS(app) with no arguments sends Access-Control-Allow-Origin: * on every
+# route, which lets any website invoke this inference API from a visitor's
+# browser. Origins are restricted to an explicit allowlist instead.
+#
+# Set CORS_ALLOWED_ORIGINS to a comma-separated list, e.g.
+#     CORS_ALLOWED_ORIGINS="https://www.molecare.co.uk,https://app.molecare.co.uk"
+# The default is localhost only, so a fresh checkout is safe by default.
+_default_origins = "http://localhost:3000,http://127.0.0.1:3000"
+ALLOWED_ORIGINS = [
+    o.strip()
+    for o in os.environ.get("CORS_ALLOWED_ORIGINS", _default_origins).split(",")
+    if o.strip()
+]
+CORS(app, origins=ALLOWED_ORIGINS)
+logging.info("CORS allowed origins: %s", ALLOWED_ORIGINS)
+
+# Reject oversized request bodies before they are buffered and decoded.
+# /predict accepts a base64 image in the JSON body; without a cap, an
+# arbitrarily large payload is decoded and pushed through the model.
+MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "10"))
+app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
+
+# Attached to every prediction response. These scores are uncalibrated model
+# outputs, not probabilities, and not a diagnosis. See MODEL_CARD.md.
+PREDICTION_DISCLAIMER = (
+    "This result is produced by an automated model and is not a medical "
+    "diagnosis. The score is not a calibrated probability. Always consult a "
+    "qualified clinician about any skin change that concerns you."
+)
 
 # Initialize services
 _mole_analysis_service = None
@@ -165,13 +194,20 @@ def health_check():
 @app.route('/predict', methods=['POST'])
 @cross_origin()
 def predict():
-    request_body = request.get_json()
-    validator = Validator()
-    prediction_id = request_body["predictionid"]
-    image_base64 = request_body["imagebase64"]
+    # silent=True so a malformed or non-JSON body yields None rather than
+    # raising, letting us answer 400 instead of 500.
+    request_body = request.get_json(silent=True)
+    if not isinstance(request_body, dict):
+        abort(400, description="Request body must be a JSON object.")
 
+    # .get() rather than indexing: a missing key is a client error (400),
+    # not an unhandled KeyError surfacing as a 500.
+    prediction_id = request_body.get("predictionid")
+    image_base64 = request_body.get("imagebase64")
+
+    validator = Validator()
     if validator.validate(prediction_id, image_base64) is False:
-        abort(400)
+        abort(400, description="predictionid and imagebase64 are both required.")
 
     app.logger.info('predictionId: %s', prediction_id)
 
@@ -186,6 +222,9 @@ def predict():
     response_body = {}
     response_body["percent"] = prediction_percent
     response_body["predictionid"] = prediction_id
+    # Every prediction leaves with a disclaimer. The other analysis endpoints
+    # already do this; /predict did not, despite being the primary route.
+    response_body["disclaimer"] = PREDICTION_DISCLAIMER
 
     return jsonify({"status": 200, "data": response_body})
 
@@ -831,4 +870,10 @@ def handle_exception(e):
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # Debug mode exposes the Werkzeug console, which allows arbitrary code
+    # execution, so it is opt-in. The default bind is loopback; binding to all
+    # interfaces must also be explicit. Production runs under gunicorn and
+    # never reaches this block.
+    debug = os.environ.get('FLASK_DEBUG', '').lower() in ('1', 'true', 'yes')
+    host = os.environ.get('FLASK_HOST', '127.0.0.1')
+    app.run(host=host, port=port, debug=debug)

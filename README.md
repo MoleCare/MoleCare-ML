@@ -57,6 +57,10 @@ Compose (nginx + app) may be available under `deploy/` — use localhost only; d
 | `HUGGINGFACE_TOKEN` | Optional Derm Foundation access |
 | `WANDB_API_KEY` | Optional training logging |
 | `AWS_*` | Optional deploy tooling — use IAM roles / local profile, **never** commit keys |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated origin allowlist. Defaults to localhost only — **set this in production** |
+| `MAX_UPLOAD_MB` | Maximum request body size, default `10`. Oversized requests get a JSON `413` |
+| `FLASK_DEBUG` | `1` enables the Werkzeug debugger. **Never set in production** — it permits arbitrary code execution |
+| `FLASK_HOST` | Bind address for local runs, default `127.0.0.1` |
 
 ---
 
