@@ -71,11 +71,14 @@ What this means in practice:
 - **No AWS credentials are stored in this repository.** There are no `AWS_ACCESS_KEY_ID` /
   `AWS_SECRET_ACCESS_KEY` secrets and none should ever be added. CI authenticates with
   short-lived credentials via GitHub OIDC, so there is no long-lived key to leak.
-- **CI can deploy code, not provision infrastructure.** The role CI assumes
-  (`MoleCareGitHubActionsRole`) is scoped to pushing images to ECR, updating the
-  `molecare-ml-*` Lambda functions and their aliases, reading one Secrets Manager secret, and
-  the deployments S3 bucket. It has no `iam:*`, no `ec2:*`, and cannot create or destroy
-  anything. Provisioning is always a `terraform apply` run by a human.
+- **CI is blocked from running `terraform apply` at the IAM level.** The role CI assumes
+  (`MoleCareGitHubActionsRole`) carries an explicit `Deny` on the Terraform state bucket and
+  lock table, and on `iam:*` / `ec2:*` / `rds:*` and resource-lifecycle actions. An explicit
+  `Deny` overrides every `Allow` in IAM, so this holds even if the role's permissions are
+  widened later. Terraform cannot apply without reading and locking remote state, so it fails
+  at init. CI can push images to ECR and update `molecare-ml-*` Lambda code and aliases —
+  deploying code onto infrastructure that already exists. Provisioning is always a
+  `terraform apply` run by a human with their own credentials.
 - **Pull requests from forks get nothing.** `pr-checks.yml` uses the `pull_request` trigger, so
   fork PRs run with a read-only token, no secrets, and no OIDC token. That is deliberate — see
   the comment at the top of that workflow. Do not change it to `pull_request_target`.
