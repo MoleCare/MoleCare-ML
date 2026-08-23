@@ -39,12 +39,24 @@ gunicorn --bind 0.0.0.0:5000 --timeout 300 wsgi
 Docker:
 
 ```bash
-docker build -t molecare-ml .
+scripts/fetch-model.sh                                  # weights are not in git
+docker build -f deploy/Dockerfile.web -t molecare-ml .  # build from the repo root
 docker run --rm -p 5000:5000 -e PORT=5000 molecare-ml
 curl http://localhost:5000/health
 ```
 
-Compose (nginx + app) may be available under `deploy/` — use localhost only; do not bake cloud credentials into images.
+There is no `Dockerfile` at the repository root — pass `-f` to pick one. `deploy/Dockerfile.web`
+is the Flask service; `Dockerfile.lambda` builds the AWS Lambda container image instead.
+
+Compose (nginx + serving + app) lives in `deploy/docker-compose.yml` and builds from the
+repository root:
+
+```bash
+scripts/fetch-model.sh
+docker compose -f deploy/docker-compose.yml up --build
+```
+
+Use localhost only; do not bake cloud credentials into images.
 
 ---
 

@@ -1,3 +1,8 @@
+# Built from the REPOSITORY ROOT as context (see deploy/docker-compose.yml),
+# so every source path below is repo-root-relative.
+#
+# cnn-models/ is not in git -- the weights ship as a GitHub Release asset.
+# Run scripts/fetch-model.sh before building.
 FROM tensorflow/serving
-COPY ./cnn-models/xception/1/ /models/melanoma/1/
-COPY ./models.conf /models/
+COPY cnn-models/xception/1/ /models/melanoma/1/
+COPY deploy/models.conf /models/

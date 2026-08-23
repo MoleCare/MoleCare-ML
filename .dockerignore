@@ -1,1 +1,28 @@
+# The build context is the repository root. Keep it small: everything here is
+# either irrelevant to a running image or large enough to slow every build.
 .git/
+.github/
+.idea/
+.vscode/
+
+# 2.3MB of research notebooks -- never needed in an image
+training-notebooks/
+doc/
+
+# tests and tooling
+tests/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+__pycache__/
+*.py[cod]
+
+# local envs
+.venv/
+venv/
+.env
+.env.*
+
+# docs
+*.md
+!README.md
