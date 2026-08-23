@@ -208,7 +208,7 @@ jobs:
           fi
 
       - name: Upload training artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: training-logs-${{ needs.prepare.outputs.run_id }}
           path: |
@@ -319,7 +319,7 @@ jobs:
           cat evaluation_report.md
 
       - name: Upload evaluation report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: evaluation-report-${{ needs.prepare.outputs.run_id }}
           path: evaluation_report.md
