@@ -58,6 +58,30 @@ pull request and a maintainer will help rewrite the branch.
   CI blocks these paths outright.
 - If you add training data, record its licence in [MODEL_CARD.md](MODEL_CARD.md).
 
+## Infrastructure and AWS
+
+**Never run `terraform apply` against MoleCare's AWS account.** Contributors have no access to
+it, and nothing in this repository should give them any. If you want to try an infrastructure
+change, run it **in your own fork, against your own AWS account** — fork the repo, point the
+Terraform variables at your account, and apply there. Never open a PR that expects a maintainer
+to apply infrastructure on your behalf without discussing it in an issue first.
+
+What this means in practice:
+
+- **No AWS credentials are stored in this repository.** There are no `AWS_ACCESS_KEY_ID` /
+  `AWS_SECRET_ACCESS_KEY` secrets and none should ever be added. CI authenticates with
+  short-lived credentials via GitHub OIDC, so there is no long-lived key to leak.
+- **CI can deploy code, not provision infrastructure.** The role CI assumes
+  (`MoleCareGitHubActionsRole`) is scoped to pushing images to ECR, updating the
+  `molecare-ml-*` Lambda functions and their aliases, reading one Secrets Manager secret, and
+  the deployments S3 bucket. It has no `iam:*`, no `ec2:*`, and cannot create or destroy
+  anything. Provisioning is always a `terraform apply` run by a human.
+- **Pull requests from forks get nothing.** `pr-checks.yml` uses the `pull_request` trigger, so
+  fork PRs run with a read-only token, no secrets, and no OIDC token. That is deliberate — see
+  the comment at the top of that workflow. Do not change it to `pull_request_target`.
+- Infrastructure lives in a separate private repository (`molecare-terraform`). Infra changes
+  are not reviewed here; open an issue describing what you need.
+
 ## Reporting model performance
 
 State the evaluation set and the metrics. For this model, **accuracy alone is not sufficient** —

@@ -58,6 +58,9 @@ permissions:
 
 env:
   AWS_REGION: eu-west-2
+  # OIDC: no long-lived keys. Trust policy lives in molecare-terraform
+  # (server/main.tf) and must name repo:MoleCare/MoleCare-ML:*
+  AWS_ROLE_ARN: arn:aws:iam::417382966138:role/MoleCareGitHubActionsRole
   ECR_REPOSITORY: molecare-ml
   S3_BUCKET: molecare-ml-artifacts-staging
   PYTHON_VERSION: '3.12'
@@ -109,6 +112,9 @@ jobs:
 
   # Run ML training via Metaflow
   train:
+    permissions:
+      contents: read
+      id-token: write   # OIDC federation to AWS
     needs: prepare
     runs-on: ubuntu-latest
     timeout-minutes: 180  # 3 hours max for training
@@ -129,8 +135,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Install dependencies
@@ -241,6 +246,9 @@ jobs:
 
   # Evaluate model quality
   evaluate:
+    permissions:
+      contents: read
+      id-token: write   # OIDC federation to AWS
     needs: [prepare, train]
     runs-on: ubuntu-latest
     steps:
@@ -255,8 +263,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Install dependencies
