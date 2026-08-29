@@ -155,15 +155,25 @@ jobs:
       - name: Verify the lock satisfies requirements.txt
         run: |
           pip install uv
+          # Seed the output with the current lock. uv, like pip-tools, keeps
+          # pins it can already see and only moves what requirements.txt or
+          # constraints.txt force it to move.
+          #
+          # Compiling to an empty path instead resolves every transitive
+          # dependency to whatever is newest that day, so this step failed on
+          # main whenever anything upstream published a release — nothing to do
+          # with the lock being wrong. Finding an available upgrade is
+          # Dependabot's job, not this check's.
+          cp requirements.lock /tmp/expected.lock
           uv pip compile requirements.txt -c constraints.txt \
             --python-version 3.12 --universal --no-header -o /tmp/expected.lock
           if ! diff -q requirements.lock /tmp/expected.lock >/dev/null; then
-            echo "::error::requirements.lock is out of date. Regenerate it:"
+            echo "::error::requirements.lock does not satisfy requirements.txt. Regenerate it:"
             echo "  uv pip compile requirements.txt -c constraints.txt -o requirements.lock --python-version 3.12 --universal --no-header"
             diff requirements.lock /tmp/expected.lock | head -40
             exit 1
           fi
-          echo "Lock file is in sync with requirements.txt."
+          echo "Lock file satisfies requirements.txt."
 
       - name: Run tests
         # Model-dependent tests skip cleanly when cnn-models/ is absent, so this
