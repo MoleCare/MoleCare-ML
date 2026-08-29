@@ -168,6 +168,31 @@ See the MoleCare DevBox doc: `docs/OPEN_SOURCE_SANITIZE_CHECKLIST.md`.
 
 ---
 
+## Contributors
+
+Thank you to everyone who has helped molecare-ml.
+
+<!-- readme: contributors,bots/- -start -->
+<table>
+	<tbody>
+		<tr>
+			<td align="center">
+				<a href="https://github.com/YauhenBichel">
+					<img src="https://avatars.githubusercontent.com/YauhenBichel?s=48" width="48" alt="Yauhen Bichel" />
+					<br />
+					<sub><b>Yauhen Bichel</b></sub>
+				</a>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<!-- readme: contributors,bots/- -end -->
+
+The list is filled by [Contributors](./.github/workflows/contributors.yml) from
+GitHub commits, bots omitted — never hand-maintained, because a stale list is
+worse than none. [Contributor graph](https://github.com/MoleCare/molecare-ml/graphs/contributors) ·
+[good first issue](https://github.com/MoleCare/molecare-ml/labels/good%20first%20issue)
+
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE).
