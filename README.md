@@ -1,5 +1,11 @@
 # MoleCare-ML
 
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
+[![PR Safety Checks](https://github.com/MoleCare/molecare-ml/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/MoleCare/molecare-ml/actions/workflows/pr-checks.yml)
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org)
+[![Model card](https://img.shields.io/badge/model%20card-published-brightgreen.svg)](./MODEL_CARD.md)
+[![Bias evaluation](https://img.shields.io/badge/Fitzpatrick%20performance-unmeasured-orange.svg)](https://github.com/MoleCare/molecare-ml/issues/10)
+
 Flask / TensorFlow service for **research and educational** mole-image analysis used by the [MoleCare](https://www.molecare.co.uk/) skin-health apps.
 
 > **Not a medical device.** Predictions and ABCDE helpers are **not** diagnoses. Always seek care from a qualified clinician for concerning skin changes.
@@ -148,6 +154,12 @@ Contributions are welcome. **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** —
 - [SECURITY.md](SECURITY.md) — reporting a vulnerability or a clinical-safety concern
 - [Good first issues](https://github.com/MoleCare/MoleCare-ML/labels/good%20first%20issue)
 
+The open problem we care most about is **performance across Fitzpatrick skin types**, which is
+currently unmeasured. [Why our 94% accuracy number means very little](doc/94-percent-accurate.md)
+explains what was and was not evaluated and why the gap matters; the work itself is tracked in
+[issue #10](https://github.com/MoleCare/MoleCare-ML/issues/10). Results that make the model look
+worse are as welcome as results that improve it.
+
 ## Intended use & limitations
 
 - **Intended:** research, education, product prototyping behind MoleCare’s own clinical disclaimers
@@ -205,3 +217,14 @@ Licensed under the [Apache License 2.0](LICENSE).
 
 Third-party model and dataset licences still apply and are **not** granted by this licence — see
 [Training data and provenance](#training-data-and-provenance) below.
+
+---
+
+## Contributors
+
+Thank you to everyone who has helped this project.
+
+<!-- readme: contributors,bots/- -start -->
+<!-- readme: contributors,bots/- -end -->
+
+The list is filled by GitHub Actions from commits (bots omitted). [Contributor graph](https://github.com/MoleCare/MoleCare-ML/graphs/contributors)
