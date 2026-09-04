@@ -10,11 +10,11 @@ astunparse==1.6.3
     # via tensorflow
 blinker==1.9.0
     # via flask
-boto3==1.43.78
+boto3==1.43.89
     # via
     #   -r requirements.txt
     #   metaflow
-botocore==1.43.78
+botocore==1.43.89
     # via
     #   boto3
     #   s3transfer
@@ -60,7 +60,7 @@ google-pasta==0.2.0
     # via tensorflow
 grpcio==1.83.0
     # via tensorflow
-gunicorn==26.1.0
+gunicorn==26.2.0
     # via -r requirements.txt
 h11==0.16.0
     # via
@@ -134,7 +134,7 @@ numpy==2.5.2
     #   scikit-learn
     #   scipy
     #   tensorflow
-opencv-python-headless==4.14.0.94
+opencv-python-headless==5.0.0.93
     # via -r requirements.txt
 opentelemetry-api==1.44.0
     # via wandb
